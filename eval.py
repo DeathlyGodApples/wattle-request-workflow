@@ -18,6 +18,7 @@ from wattle.config import LLM_MODEL, RESULTS_DIR, TIMEZONE
 from wattle.llm import CachedLLM, GeminiClient, LLMClient, LLMError
 from wattle.metrics import Prediction, expected_final_type, per_type_accuracy, type_accuracy
 from wattle.models import LabelledRequest
+from wattle.prompts import FEW_SHOT_IDS
 from wattle.rules import ai_only_decision
 
 
@@ -27,16 +28,34 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--set", dest="dataset", choices=["dev", "test"], required=True)
     parser.add_argument("--no-rules", action="store_true", help="AI alone (ablation baseline)")
     parser.add_argument("--limit", type=int, default=None, help="only the first N requests")
+    parser.add_argument(
+        "--include-fewshot",
+        action="store_true",
+        help="dev only: also score the six requests used as few-shot examples",
+    )
     args = parser.parse_args(argv)
     if args.limit is not None and args.limit < 1:
         parser.error("--limit must be 1 or more")
     return args
 
 
-def load_rows(dataset: str, limit: int | None) -> list[LabelledRequest]:
-    """Pick the labelled file; the test set is only ever read here, for scoring."""
+def load_rows(
+    dataset: str, limit: int | None = None, *, include_fewshot: bool = False
+) -> tuple[list[LabelledRequest], int]:
+    """Pick the rows to score and say how many few-shot examples were left out.
+
+    The model has already seen the few-shot examples with their answers, so scoring them
+    would flatter the dev result. The test set has none, so nothing is dropped there.
+    """
     rows = data.load_dev() if dataset == "dev" else data.load_test()
-    return rows[:limit] if limit is not None else rows
+    excluded = 0
+    if dataset == "dev" and not include_fewshot:
+        kept = [row for row in rows if row.id not in FEW_SHOT_IDS]
+        excluded = len(rows) - len(kept)
+        rows = kept
+    if limit is not None:
+        rows = rows[:limit]
+    return rows, excluded
 
 
 def predict(row: LabelledRequest, llm: LLMClient) -> Prediction:
@@ -68,13 +87,16 @@ def run(rows: list[LabelledRequest], llm: LLMClient) -> list[Prediction]:
     return predictions
 
 
-def summarise(predictions: list[Prediction], dataset: str, mode: str) -> dict:
+def summarise(
+    predictions: list[Prediction], dataset: str, mode: str, excluded_few_shot: int = 0
+) -> dict:
     """Collect the numbers once so the console, Markdown and JSON outputs all agree."""
     return {
         "dataset": dataset,
         "mode": mode,
         "model": LLM_MODEL,
         "n": len(predictions),
+        "excluded_few_shot": excluded_few_shot,
         "type_accuracy": round(type_accuracy(predictions), 4),
         "correct": sum(p.correct for p in predictions),
         "per_type": {
@@ -95,7 +117,8 @@ def to_markdown(summary: dict) -> str:
         f"# Eval: {summary['dataset']} set, {summary['mode']}",
         "",
         f"- Model: `{summary['model']}`",
-        f"- Requests: {summary['n']}",
+        f"- Requests scored: {summary['n']}",
+        f"- Few-shot examples excluded: {summary['excluded_few_shot']}",
         f"- Type accuracy: {summary['correct']}/{summary['n']} ({summary['type_accuracy']:.1%})",
         "",
         "| Expected type | Correct | Total |",
@@ -128,14 +151,17 @@ def main(argv: list[str] | None = None) -> int:
     if not args.no_rules:
         print("Rules are added in milestone M3. For now run with --no-rules.")
         return 2
+    rows, excluded = load_rows(args.dataset, args.limit, include_fewshot=args.include_fewshot)
+    if excluded:
+        print(f"Excluded {excluded} few-shot example(s) from scoring (--include-fewshot to keep).")
     try:
         llm = CachedLLM(GeminiClient(), model=LLM_MODEL)
-        predictions = run(load_rows(args.dataset, args.limit), llm)
+        predictions = run(rows, llm)
     except LLMError as exc:
         print(f"Stopped, no report written: {exc}")
         print("Answers received so far are cached, so re-running continues from here.")
         return 1
-    summary = summarise(predictions, args.dataset, "no-rules")
+    summary = summarise(predictions, args.dataset, "no-rules", excluded)
     report_path = write_outputs(summary, predictions)
     print()
     print(to_markdown(summary))

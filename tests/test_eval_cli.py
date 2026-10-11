@@ -11,7 +11,7 @@ import eval as eval_cli
 from wattle import data
 from wattle.llm import FakeLLM, LLMError
 from wattle.models import Extracted, LLMClassification, Product, RequestType
-from wattle.prompts import classifier_user_prompt
+from wattle.prompts import FEW_SHOT_IDS, classifier_user_prompt
 
 
 def always(request_type: RequestType) -> FakeLLM:
@@ -27,6 +27,57 @@ def always(request_type: RequestType) -> FakeLLM:
             rationale="rationale",
         )
     )
+
+
+def test_dev_excludes_the_few_shot_examples_by_default() -> None:
+    rows, excluded = eval_cli.load_rows("dev")
+    assert excluded == 6
+    assert len(rows) == 14
+    assert {row.id for row in rows}.isdisjoint(FEW_SHOT_IDS)
+
+
+def test_include_fewshot_scores_all_dev_rows() -> None:
+    rows, excluded = eval_cli.load_rows("dev", include_fewshot=True)
+    assert excluded == 0
+    assert len(rows) == 20
+
+
+def test_test_set_is_never_reduced() -> None:
+    rows, excluded = eval_cli.load_rows("test")
+    assert excluded == 0
+    assert len(rows) == 58
+
+
+def test_limit_applies_after_the_exclusion() -> None:
+    rows, excluded = eval_cli.load_rows("dev", 3)
+    assert excluded == 6
+    assert len(rows) == 3
+    assert {row.id for row in rows}.isdisjoint(FEW_SHOT_IDS)
+
+
+def test_include_fewshot_flag_defaults_to_off() -> None:
+    assert eval_cli.parse_args(["--set", "dev", "--no-rules"]).include_fewshot is False
+    args = eval_cli.parse_args(["--set", "dev", "--no-rules", "--include-fewshot"])
+    assert args.include_fewshot is True
+
+
+def test_report_states_how_many_were_excluded() -> None:
+    rows, excluded = eval_cli.load_rows("dev")
+    predictions = eval_cli.run(rows, always(RequestType.COMPLAINT))
+    summary = eval_cli.summarise(predictions, "dev", "no-rules", excluded)
+    assert summary["n"] == 14
+    assert summary["excluded_few_shot"] == 6
+    assert "Few-shot examples excluded: 6" in eval_cli.to_markdown(summary)
+
+
+def test_main_prints_the_excluded_count(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    monkeypatch.setattr(eval_cli, "RESULTS_DIR", tmp_path)
+    monkeypatch.setattr(eval_cli, "GeminiClient", lambda: always(RequestType.COMPLAINT))
+    monkeypatch.setattr(eval_cli, "CachedLLM", lambda inner, model: inner)
+    assert eval_cli.main(["--set", "dev", "--no-rules"]) == 0
+    assert "Excluded 6 few-shot example(s)" in capsys.readouterr().out
 
 
 def test_run_scores_each_row_against_its_label() -> None:
