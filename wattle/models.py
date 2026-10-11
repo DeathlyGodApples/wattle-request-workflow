@@ -128,8 +128,8 @@ class Extracted(BaseModel):
     summary: str
 
 
-class Classification(BaseModel):
-    """The LLM's reading of a request; an input to the rules, not the final decision."""
+class LLMClassification(BaseModel):
+    """Exactly the fields the LLM is asked to fill; this is the response schema it is given."""
 
     request_type: RequestType
     product: Product
@@ -138,6 +138,11 @@ class Classification(BaseModel):
     missing_info: list[str]
     confidence: float = Field(ge=0.0, le=1.0)
     rationale: str
+
+
+class Classification(LLMClassification):
+    """The LLM's reading plus `llm_error`, which only our code sets; an input to the rules."""
+
     llm_error: bool = False
 
 

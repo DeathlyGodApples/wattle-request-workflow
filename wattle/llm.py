@@ -5,16 +5,28 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import time
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Protocol
+from typing import Any, Protocol
 
+import httpx
+from google import genai
+from google.genai import errors, types
 from pydantic import BaseModel, ValidationError
 
-from wattle.config import CACHE_DIR, LLM_MODEL
+from wattle.config import CACHE_DIR, GEMINI_API_KEY, LLM_MODEL, LLM_RPM
 
 logger = logging.getLogger(__name__)
+
+MAX_RETRIES = 3
+BACKOFF_SECONDS = 5  # doubles each retry: 5 s, 10 s, 20 s
+REQUEST_TIMEOUT_MS = 120_000
+
+# Everything the SDK can raise for a failed call: API errors, a non-JSON reply (for example a
+# proxy's HTML error page), and network or timeout errors from its httpx transport.
+RETRYABLE_SDK_ERRORS = (errors.APIError, errors.UnknownApiResponseError, httpx.HTTPError)
 
 Responder = Callable[[str, str, type[BaseModel]], BaseModel]
 
@@ -106,24 +118,96 @@ class CachedLLM:
             return None
         try:
             return schema.model_validate_json(path.read_text(encoding="utf-8"))
-        except (ValidationError, OSError) as exc:
+        except (ValidationError, OSError, UnicodeDecodeError) as exc:
             logger.warning("Ignoring bad LLM cache entry %s: %s", path.name, exc)
             return None
 
     def _write(self, path: Path, result: BaseModel) -> None:
         """Write to a temp file then swap, so an interrupted run cannot leave half an entry."""
-        self._cache_dir.mkdir(parents=True, exist_ok=True)
-        tmp = path.with_suffix(".tmp")
-        tmp.write_text(result.model_dump_json(indent=2), encoding="utf-8")
-        tmp.replace(path)
+        try:
+            self._cache_dir.mkdir(parents=True, exist_ok=True)
+            tmp = path.with_suffix(".tmp")
+            tmp.write_text(result.model_dump_json(indent=2), encoding="utf-8")
+            tmp.replace(path)
+        except OSError as exc:
+            # The answer is already in hand; a full disk must not throw it away.
+            logger.warning("Could not write LLM cache entry %s: %s", path.name, exc)
 
 
 class GeminiClient:
-    """Real provider; implemented in M2."""
+    """Google Gemini provider: JSON mode at temperature 0, with retries and a simple throttle."""
 
-    def __init__(self, model: str = LLM_MODEL) -> None:
+    def __init__(
+        self,
+        model: str = LLM_MODEL,
+        *,
+        api_key: str = GEMINI_API_KEY,
+        rpm: int = LLM_RPM,
+        client: Any = None,
+        sleep: Callable[[float], None] = time.sleep,
+        clock: Callable[[], float] = time.monotonic,
+    ) -> None:
+        if client is None and not api_key:
+            raise LLMError("GEMINI_API_KEY is not set. Add it to your .env file.")
         self.model = model
+        self._client = client if client is not None else _build_sdk_client(api_key)
+        self._min_interval = 60.0 / rpm if rpm > 0 else 0.0
+        self._sleep = sleep
+        self._clock = clock
+        self._last_call: float | None = None
 
     def generate_json(self, system: str, user: str, schema: type[BaseModel]) -> BaseModel:
-        """Placeholder so the interface exists before the real call is written."""
-        raise NotImplementedError("GeminiClient is implemented in milestone M2.")
+        """Call Gemini and validate the reply; every failure surfaces as LLMError."""
+        text = self._call_with_retries(system, user, schema)
+        if not text:
+            raise LLMError("Gemini returned no text (the response may have been blocked).")
+        try:
+            return schema.model_validate_json(text)
+        except ValidationError as exc:
+            raise LLMError(f"Gemini output failed validation: {exc}") from exc
+
+    def _call_with_retries(self, system: str, user: str, schema: type[BaseModel]) -> str | None:
+        """Retry rate limits, server errors and network drops; anything else fails at once."""
+        config = types.GenerateContentConfig(
+            system_instruction=system,
+            temperature=0,
+            response_mime_type="application/json",
+            response_schema=schema,
+        )
+        for attempt in range(MAX_RETRIES + 1):
+            self._throttle()
+            try:
+                response = self._client.models.generate_content(
+                    model=self.model, contents=user, config=config
+                )
+                return response.text
+            except RETRYABLE_SDK_ERRORS as exc:
+                if attempt == MAX_RETRIES or not _is_retryable(exc):
+                    raise LLMError(f"Gemini call failed: {exc}") from exc
+                delay = BACKOFF_SECONDS * 2**attempt
+                logger.warning("Gemini call failed (%s); retrying in %ss", exc, delay)
+                self._sleep(delay)
+        raise LLMError("Gemini call failed: retries exhausted")  # unreachable; keeps types honest
+
+    def _throttle(self) -> None:
+        """Space calls out so a free-tier requests-per-minute limit is not hit."""
+        now = self._clock()
+        if self._last_call is not None:
+            wait = self._min_interval - (now - self._last_call)
+            if wait > 0:
+                self._sleep(wait)
+                now += wait
+        self._last_call = now
+
+
+def _build_sdk_client(api_key: str) -> genai.Client:
+    """Set a request timeout: the SDK's default is none, so a stalled call would hang forever."""
+    options = types.HttpOptions(timeout=REQUEST_TIMEOUT_MS)
+    return genai.Client(api_key=api_key, http_options=options)
+
+
+def _is_retryable(exc: Exception) -> bool:
+    """Rate limits (429), server errors (5xx) and network errors are worth another try."""
+    if isinstance(exc, errors.APIError):
+        return exc.code == 429 or 500 <= exc.code < 600
+    return True
