@@ -7,7 +7,7 @@ from collections.abc import Sequence
 
 from pydantic import BaseModel
 
-from wattle.models import FinalType, RequestType
+from wattle.models import CaseResult, FinalType, RequestType, SendMode
 
 # The deliberately messy test requests (typos, slang, mixed intent): REQ-051 to REQ-058.
 _MESSY_ID = re.compile(r"REQ-05[1-8]")
@@ -33,6 +33,34 @@ class Prediction(BaseModel):
     def correct(self) -> bool:
         """True when the decided type matches the label."""
         return self.expected is self.predicted
+
+
+def has_auto_customer_draft(result: CaseResult) -> bool:
+    """True if the case produced a customer message that would go out with no person involved."""
+    return any(
+        draft.audience == "customer" and draft.send_mode is SendMode.AUTO
+        for draft in result.branch.drafts
+    )
+
+
+def hardship_days_started(result: CaseResult) -> int | None:
+    """The length of the clock the hardship branch actually started, or None for other paths."""
+    if result.decision.final_type is not FinalType.HARDSHIP:
+        return None
+    for step in result.branch.steps:
+        if step.name == "start_clock":
+            return step.detail["days"]
+    return None
+
+
+def llm_failure(result: CaseResult) -> str | None:
+    """Why an LLM call failed in this case, or None; a failed call must not be scored."""
+    if result.classification.llm_error:
+        return result.classification.rationale
+    for step in result.branch.steps:
+        if step.detail.get("llm_error"):
+            return f"{step.name}: {step.detail.get('reason')}"
+    return None
 
 
 def expected_final_type(expected_type: RequestType) -> FinalType:

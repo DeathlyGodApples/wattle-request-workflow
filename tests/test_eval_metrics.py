@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import pytest
 
+from helpers import NOW, make_classification, make_request, scripted_llm
 from wattle import metrics
+from wattle.llm import FakeLLM
 from wattle.metrics import Prediction
-from wattle.models import FinalType, RequestType
+from wattle.models import CaseResult, FaqSelection, FinalType, RequestType
+from wattle.pipeline import process
 
 
 def make_prediction(expected: str, predicted: str, **overrides: object) -> Prediction:
@@ -181,3 +184,45 @@ def test_build_metrics_is_json_ready_and_complete() -> None:
         {"id": "REQ-002", "expected": "complaint", "predicted": "critical"},
         {"id": "REQ-051", "expected": "critical", "predicted": "complaint"},
     ]
+
+
+def run_case(request_type: str, faq: FaqSelection | None = None, **overrides: object) -> CaseResult:
+    """A real pipeline result for a crafted request, so the helpers read real branch output."""
+    llm = scripted_llm(make_classification(request_type, **overrides), faq)
+    return process(make_request("Customer text"), llm, now=NOW)
+
+
+def test_auto_customer_draft_is_read_from_the_drafts_the_branch_produced() -> None:
+    matched = FaqSelection(faq_id="FAQ-01", confidence=0.9)
+    unmatched = FaqSelection(faq_id=None, confidence=0.0)
+    assert metrics.has_auto_customer_draft(run_case("complaint")) is True
+    assert metrics.has_auto_customer_draft(run_case("service_request")) is True
+    assert metrics.has_auto_customer_draft(run_case("general_enquiry", matched)) is True
+    assert metrics.has_auto_customer_draft(run_case("general_enquiry", unmatched)) is False
+    assert metrics.has_auto_customer_draft(run_case("critical")) is False
+    assert metrics.has_auto_customer_draft(run_case("hardship")) is False
+    assert metrics.has_auto_customer_draft(run_case("unclear")) is False
+
+
+def test_an_auto_internal_note_is_not_a_customer_send() -> None:
+    result = run_case("complaint")
+    internal_only = result.branch.model_copy(
+        update={"drafts": [d for d in result.branch.drafts if d.audience == "internal"]}
+    )
+    assert internal_only.drafts, "the complaint branch should write an internal note"
+    assert metrics.has_auto_customer_draft(result.model_copy(update={"branch": internal_only})) is (
+        False
+    )
+
+
+def test_hardship_days_come_from_the_clock_the_branch_started() -> None:
+    assert metrics.hardship_days_started(run_case("hardship", product="car_loan")) == 21
+    assert metrics.hardship_days_started(run_case("hardship", product="savings")) == 10
+    assert metrics.hardship_days_started(run_case("complaint")) is None  # a 30-day clock, ignored
+
+
+def test_llm_failure_reports_a_failed_classification_or_faq_call() -> None:
+    assert metrics.llm_failure(run_case("complaint")) is None
+    assert "select_faq" in (metrics.llm_failure(run_case("general_enquiry", faq=None)) or "")
+    outage = process(make_request("Customer text"), FakeLLM(), now=NOW)
+    assert (metrics.llm_failure(outage) or "").startswith("LLM error")

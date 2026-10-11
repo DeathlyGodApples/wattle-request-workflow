@@ -14,15 +14,19 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from wattle import data
-from wattle.classifier import classify
 from wattle.config import LLM_MODEL, RESULTS_DIR, TIMEZONE
-from wattle.deadlines import hardship_clock_days
-from wattle.keywords import scan
 from wattle.llm import CachedLLM, GeminiClient, LLMClient, LLMError
-from wattle.metrics import Prediction, build_metrics, expected_final_type
-from wattle.models import FinalType, LabelledRequest
+from wattle.metrics import (
+    Prediction,
+    build_metrics,
+    expected_final_type,
+    hardship_days_started,
+    has_auto_customer_draft,
+    llm_failure,
+)
+from wattle.models import LabelledRequest
+from wattle.pipeline import process
 from wattle.prompts import FEW_SHOT_IDS
-from wattle.rules import apply_rules
 
 MODE_LABELS = {"no-rules": "AI alone", "rules": "AI + rules"}
 NOT_AVAILABLE = "n/a"
@@ -70,29 +74,25 @@ def load_rows(
 
 
 def predict(row: LabelledRequest, llm: LLMClient, *, use_rules: bool = True) -> Prediction:
-    """Decide one request without its labels, then pair the decision with the labels.
+    """Run one request through the whole pipeline without its labels, then pair it with them.
 
     A failed LLM call is raised, not scored: a run with failures is not a measurement.
     """
-    request = row.to_request()
-    classification = classify(request, llm)
-    if classification.llm_error:
-        raise LLMError(f"{row.id}: {classification.rationale}")
-    hits = scan(f"{request.subject}\n{request.body}")
-    decision = apply_rules(classification, hits, use_rules=use_rules)
-    is_hardship = decision.final_type is FinalType.HARDSHIP
+    result = process(row.to_request(), llm, use_rules=use_rules)
+    failure = llm_failure(result)
+    if failure:
+        raise LLMError(f"{row.id}: {failure}")
     return Prediction(
         id=row.id,
         expected=expected_final_type(row.expected_type),
-        predicted=decision.final_type,
-        ai_type=classification.request_type,
-        confidence=classification.confidence,
-        rules_fired=decision.rules_fired,
-        keyword_hits=hits.all(),
-        requires_human=decision.requires_human,
-        # Stand-in until branches exist (M4): without a human gate, a customer draft is auto-sent.
-        auto_customer_draft=not decision.requires_human,
-        hardship_days=hardship_clock_days(classification.product) if is_hardship else None,
+        predicted=result.decision.final_type,
+        ai_type=result.classification.request_type,
+        confidence=result.classification.confidence,
+        rules_fired=result.decision.rules_fired,
+        keyword_hits=result.keyword_hits,
+        requires_human=result.decision.requires_human,
+        auto_customer_draft=has_auto_customer_draft(result),
+        hardship_days=hardship_days_started(result),
         human_before_reply=row.human_before_reply,
         statutory_21d=row.statutory_21d,
     )

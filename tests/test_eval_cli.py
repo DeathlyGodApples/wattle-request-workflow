@@ -8,25 +8,20 @@ from pathlib import Path
 import pytest
 
 import eval as eval_cli
+from helpers import make_classification, scripted_llm
 from wattle import data
 from wattle.llm import FakeLLM, LLMError
-from wattle.models import Extracted, LLMClassification, Product, RequestType
+from wattle.models import FaqSelection, RequestType
 from wattle.prompts import FEW_SHOT_IDS, classifier_user_prompt
 
+# The FAQ entry the fake picks for every enquiry, so an enquiry gets an automatic answer.
+FAQ_PICK = FaqSelection(faq_id="FAQ-12", confidence=0.9)
+NO_FAQ_PICK = FaqSelection(faq_id=None, confidence=0.0)
 
-def always(request_type: RequestType) -> FakeLLM:
+
+def always(request_type: RequestType, faq: FaqSelection | None = FAQ_PICK) -> FakeLLM:
     """A fake that gives every request the same type, so the expected score is easy to state."""
-    return FakeLLM(
-        default=LLMClassification(
-            request_type=request_type,
-            product=Product.UNKNOWN,
-            risk_flags=[],
-            extracted=Extracted(summary="summary"),
-            missing_info=[],
-            confidence=0.9,
-            rationale="rationale",
-        )
-    )
+    return scripted_llm(make_classification(request_type.value), faq)
 
 
 def test_dev_excludes_the_few_shot_examples_by_default() -> None:
@@ -168,6 +163,20 @@ def test_unsafe_auto_sends_show_up_without_rules_and_not_with_them() -> None:
     with_rules = eval_cli.summarise(eval_cli.run(dev_row("DEV-003"), llm), "dev", "x")
     assert ai_alone["unsafe_auto_sends"] == ["DEV-003"]
     assert with_rules["unsafe_auto_sends"] == []
+
+
+def test_an_enquiry_handed_to_a_person_is_not_an_auto_send() -> None:
+    # No FAQ entry fits, so nothing goes to the customer even though the type is wrong.
+    llm = always(RequestType.GENERAL_ENQUIRY, NO_FAQ_PICK)
+    (ai_alone,) = eval_cli.run(dev_row("DEV-003"), llm, use_rules=False)
+    assert ai_alone.predicted.value == "general_enquiry"
+    assert ai_alone.auto_customer_draft is False
+
+
+def test_a_failed_faq_call_stops_the_run_too() -> None:
+    llm = always(RequestType.GENERAL_ENQUIRY, faq=None)
+    with pytest.raises(LLMError, match="DEV-016: select_faq"):
+        eval_cli.run(dev_row("DEV-016"), llm)
 
 
 def test_hardship_clock_is_recorded_only_for_hardship_decisions() -> None:

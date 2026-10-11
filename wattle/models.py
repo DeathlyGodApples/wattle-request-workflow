@@ -146,6 +146,13 @@ class Classification(LLMClassification):
     llm_error: bool = False
 
 
+class FaqSelection(BaseModel):
+    """What the LLM returns for an enquiry: which FAQ entry answers it, or none."""
+
+    faq_id: str | None
+    confidence: float = Field(ge=0.0, le=1.0)
+
+
 class Decision(BaseModel):
     """The final path chosen by code, with the rules that led there."""
 
@@ -184,6 +191,7 @@ class CaseResult(BaseModel):
     """The full record of one request going through the pipeline."""
 
     request: Request
+    received_at: datetime  # the moment every due date in this case is counted from
     classification: Classification
     decision: Decision
     branch: BranchResult
