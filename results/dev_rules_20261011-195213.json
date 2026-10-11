@@ -1,0 +1,107 @@
+{
+  "dataset": "dev",
+  "mode": "rules",
+  "model": "gemini-3.5-flash-lite",
+  "excluded_few_shot": 6,
+  "n": 14,
+  "correct": 14,
+  "type_accuracy": 1.0,
+  "per_type": {
+    "critical": {
+      "correct": 3,
+      "total": 3
+    },
+    "hardship": {
+      "correct": 3,
+      "total": 3
+    },
+    "complaint": {
+      "correct": 2,
+      "total": 2
+    },
+    "service_request": {
+      "correct": 2,
+      "total": 2
+    },
+    "general_enquiry": {
+      "correct": 2,
+      "total": 2
+    },
+    "human_review": {
+      "correct": 2,
+      "total": 2
+    }
+  },
+  "critical": {
+    "caught": 3,
+    "total": 3,
+    "false_alarms": []
+  },
+  "hardship": {
+    "caught": 3,
+    "total": 3,
+    "clock_correct": 3,
+    "clock_total": 3
+  },
+  "unsafe_auto_sends": [],
+  "human_review_rate": 0.5714,
+  "clean": {
+    "correct": 14,
+    "total": 14
+  },
+  "messy": {
+    "correct": 0,
+    "total": 0
+  },
+  "confusion": {
+    "critical": {
+      "critical": 3,
+      "hardship": 0,
+      "complaint": 0,
+      "service_request": 0,
+      "general_enquiry": 0,
+      "human_review": 0
+    },
+    "hardship": {
+      "critical": 0,
+      "hardship": 3,
+      "complaint": 0,
+      "service_request": 0,
+      "general_enquiry": 0,
+      "human_review": 0
+    },
+    "complaint": {
+      "critical": 0,
+      "hardship": 0,
+      "complaint": 2,
+      "service_request": 0,
+      "general_enquiry": 0,
+      "human_review": 0
+    },
+    "service_request": {
+      "critical": 0,
+      "hardship": 0,
+      "complaint": 0,
+      "service_request": 2,
+      "general_enquiry": 0,
+      "human_review": 0
+    },
+    "general_enquiry": {
+      "critical": 0,
+      "hardship": 0,
+      "complaint": 0,
+      "service_request": 0,
+      "general_enquiry": 2,
+      "human_review": 0
+    },
+    "human_review": {
+      "critical": 0,
+      "hardship": 0,
+      "complaint": 0,
+      "service_request": 0,
+      "general_enquiry": 0,
+      "human_review": 2
+    }
+  },
+  "misses": []
+}
