@@ -1,0 +1,136 @@
+{
+  "dataset": "test",
+  "mode": "no-rules",
+  "model": "gemini-3.5-flash-lite",
+  "excluded_few_shot": 0,
+  "n": 58,
+  "correct": 53,
+  "type_accuracy": 0.9138,
+  "per_type": {
+    "critical": {
+      "correct": 13,
+      "total": 13
+    },
+    "hardship": {
+      "correct": 11,
+      "total": 11
+    },
+    "complaint": {
+      "correct": 11,
+      "total": 13
+    },
+    "service_request": {
+      "correct": 9,
+      "total": 9
+    },
+    "general_enquiry": {
+      "correct": 8,
+      "total": 9
+    },
+    "human_review": {
+      "correct": 1,
+      "total": 3
+    }
+  },
+  "critical": {
+    "caught": 13,
+    "total": 13,
+    "false_alarms": []
+  },
+  "hardship": {
+    "caught": 11,
+    "total": 11,
+    "clock_correct": 11,
+    "clock_total": 11
+  },
+  "unsafe_auto_sends": [
+    "REQ-046",
+    "REQ-050"
+  ],
+  "human_review_rate": 0.431,
+  "clean": {
+    "correct": 46,
+    "total": 50
+  },
+  "messy": {
+    "correct": 7,
+    "total": 8
+  },
+  "confusion": {
+    "critical": {
+      "critical": 13,
+      "hardship": 0,
+      "complaint": 0,
+      "service_request": 0,
+      "general_enquiry": 0,
+      "human_review": 0
+    },
+    "hardship": {
+      "critical": 0,
+      "hardship": 11,
+      "complaint": 0,
+      "service_request": 0,
+      "general_enquiry": 0,
+      "human_review": 0
+    },
+    "complaint": {
+      "critical": 0,
+      "hardship": 0,
+      "complaint": 11,
+      "service_request": 1,
+      "general_enquiry": 1,
+      "human_review": 0
+    },
+    "service_request": {
+      "critical": 0,
+      "hardship": 0,
+      "complaint": 0,
+      "service_request": 9,
+      "general_enquiry": 0,
+      "human_review": 0
+    },
+    "general_enquiry": {
+      "critical": 0,
+      "hardship": 0,
+      "complaint": 0,
+      "service_request": 1,
+      "general_enquiry": 8,
+      "human_review": 0
+    },
+    "human_review": {
+      "critical": 0,
+      "hardship": 0,
+      "complaint": 1,
+      "service_request": 1,
+      "general_enquiry": 0,
+      "human_review": 1
+    }
+  },
+  "misses": [
+    {
+      "id": "REQ-044",
+      "expected": "complaint",
+      "predicted": "general_enquiry"
+    },
+    {
+      "id": "REQ-045",
+      "expected": "complaint",
+      "predicted": "service_request"
+    },
+    {
+      "id": "REQ-046",
+      "expected": "human_review",
+      "predicted": "complaint"
+    },
+    {
+      "id": "REQ-050",
+      "expected": "human_review",
+      "predicted": "service_request"
+    },
+    {
+      "id": "REQ-052",
+      "expected": "general_enquiry",
+      "predicted": "service_request"
+    }
+  ]
+}
