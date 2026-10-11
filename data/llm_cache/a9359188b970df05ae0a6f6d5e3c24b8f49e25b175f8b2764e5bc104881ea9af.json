@@ -1,0 +1,17 @@
+{
+  "request_type": "critical",
+  "product": "credit_card",
+  "risk_flags": [
+    "unauthorised_transaction"
+  ],
+  "extracted": {
+    "amount": "$210",
+    "date": "yesterday",
+    "account_hint": "petrol station in Geelong",
+    "desired_outcome": "properly block the card and investigate unauthorised usage",
+    "summary": "The customer wants to ensure their lost card is properly blocked after an unauthorised transaction occurred following a previous lost report."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer reports an unrecognised transaction on a lost card and asks for it to be blocked, which falls under critical safety and security procedures."
+}

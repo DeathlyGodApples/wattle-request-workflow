@@ -1,0 +1,17 @@
+{
+  "request_type": "service_request",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": "$20,000",
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Raise international transfer limit to $20,000",
+    "summary": "The customer wants to raise their international transfer limit to $20,000."
+  },
+  "missing_info": [
+    "account number"
+  ],
+  "confidence": 1.0,
+  "rationale": "The customer is asking to change a limit on their account, which is a service request."
+}

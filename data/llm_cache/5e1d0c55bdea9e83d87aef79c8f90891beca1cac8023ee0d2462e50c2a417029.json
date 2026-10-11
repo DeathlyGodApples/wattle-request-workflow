@@ -1,0 +1,15 @@
+{
+  "request_type": "general_enquiry",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "To know if there are fees for using a debit card overseas.",
+    "summary": "The customer is asking if there is a fee for using their debit card overseas in Japan."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is asking for information about overseas fees and nothing needs to be actioned on their account."
+}

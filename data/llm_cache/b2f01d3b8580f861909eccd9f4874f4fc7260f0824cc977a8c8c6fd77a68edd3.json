@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "credit_card",
+  "risk_flags": [],
+  "extracted": {
+    "amount": "$34",
+    "date": null,
+    "account_hint": "credit card",
+    "desired_outcome": "Refund the interest charge",
+    "summary": "The customer wants a refund for an incorrect interest charge of $34 on their credit card."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is expressing dissatisfaction with an incorrect fee and expects a refund."
+}

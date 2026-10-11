@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "credit_card",
+  "risk_flags": [],
+  "extracted": {
+    "amount": "$20",
+    "date": "Friday night",
+    "account_hint": null,
+    "desired_outcome": "reverse the $20 late fee and interest",
+    "summary": "The customer is complaining about a late fee and interest charged because the app was down on Friday night and wants them reversed."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is expressing dissatisfaction with a fee and a decision caused by a service outage and expects a financial fix."
+}

@@ -24,12 +24,7 @@ messages are synthetic.
 
 ## 1. Quick start
 
-Needs Python 3.11 or newer and a free Gemini API key from Google AI Studio.
-
-**The app and the evaluation need an API key.** The LLM answer cache (`.cache/`) is not part
-of the repository, so a fresh clone has no stored answers: without a key the app shows
-"GEMINI_API_KEY is not set" when you press Process, including for the demo requests. Only the
-tests run without a key. Your key goes in `.env`, which git ignores, and is never committed.
+Needs Python 3.11 or newer. **No API key is needed to run the demo or the evaluation.**
 
 Windows (PowerShell):
 
@@ -37,7 +32,6 @@ Windows (PowerShell):
 py -3.11 -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-Copy-Item .env.example .env
 ```
 
 macOS or Linux:
@@ -46,19 +40,33 @@ macOS or Linux:
 python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env
 ```
 
-Then open `.env` and set:
+### Why no key is needed, and when one is
 
-```
-GEMINI_API_KEY=your-key-here
-LLM_MODEL=gemini-3.5-flash-lite
+The repository includes the LLM answer cache in `data/llm_cache/`: the model's answers for
+all 20 dev and 58 test requests (90 small JSON files).
+
+- **What it holds:** model answers to synthetic requests, each stored under a hash of the
+  model name and the prompt. It contains no secrets and no real customer data.
+- **What it gives you:** the app's sample requests and both evaluations run from it with no
+  key and no network, and they reproduce the published numbers exactly.
+- **When you need a key:** for anything not in the cache. That means pasted custom text, or
+  any run after changing a prompt, the FAQ or `LLM_MODEL`, because the cache key includes all
+  of them. Without a key such a request is not guessed at: the app says the LLM call failed
+  and takes the safe path (human review, or critical if a risk keyword is present), and the
+  eval stops without writing a report.
+
+To add a key (free from Google AI Studio):
+
+```powershell
+Copy-Item .env.example .env      # macOS or Linux: cp .env.example .env
 ```
 
-`LLM_MODEL=gemini-3.5-flash-lite` is the model the published results used. If you leave it
-empty the default is `gemini-3.8-flash`, whose free-tier daily limit proved too low for the
-evaluation runs in this project.
+Then set `GEMINI_API_KEY=your-key-here` in `.env`. Git ignores `.env`, so the key is never
+committed. Leave `LLM_MODEL` empty to use the default, `gemini-3.5-flash-lite`, which is the
+model the cache and the published results were made with. New answers are added to
+`data/llm_cache/` and will show up as new files in `git status`.
 
 Run the app:
 
@@ -76,16 +84,14 @@ python eval.py --compare results\test_no-rules_<timestamp>.json results\test_rul
 
 Each eval prints the name of the report it wrote; use those two names in `--compare`.
 
-Things to know before the first run:
+Things to know:
 
-- **The first eval calls the API about 70 times** (58 classifications plus one FAQ lookup per
-  enquiry). Calls are throttled to `LLM_RPM` requests per minute (default 10), so allow several
-  minutes. Every answer is cached under `.cache/llm/`, so the second eval and the app are
-  instant and cost nothing.
+- **Both evals finish in seconds** because every answer comes from the committed cache.
+- **After a prompt or model change the cache no longer applies.** A full run is then about 70
+  API calls (58 classifications plus one FAQ lookup per enquiry), throttled to `LLM_RPM`
+  requests per minute (default 10), so allow several minutes.
 - **If a call fails, the eval stops and writes no report.** Answers so far are cached, so
   running the same command again continues where it stopped.
-- **The cache is keyed by model and prompt.** Changing `LLM_MODEL` or a prompt starts a new set
-  of calls.
 
 Run the tests (no network, no API key needed):
 
@@ -199,8 +205,8 @@ flowchart TD
 
     %% Hardship
     H1["<b>Hardship</b><br/>reply drafted, held for approval"]
-    H2{"Credit<br/>product?"}
-    H3A["<b>21-day legal clock</b><br/>credit product (NCC s72)"]
+    H2{"Credit product<br/>or unknown?"}
+    H3A["<b>21-day clock</b><br/>NCC s72 · date shown to customer"]
     H3B["<b>Internal deadline</b><br/>10 days"]
     H4["<b>Hardship team approves reply</b><br/>and agrees an arrangement"]
     WHICH -->|hardship| H1 --> H2
@@ -208,7 +214,7 @@ flowchart TD
     H2 -->|no| H3B --> H4
 
     %% Complaint
-    P1["<b>Complaint</b><br/>acknowledgement sent<br/>(1 business day target)"]
+    P1["<b>Complaint</b><br/>acknowledgement drafted<br/>due within 1 day"]
     P2["<b>Summary to complaints team</b><br/>30-day clock starts"]
     P3["<b>Complaints officer</b><br/>investigates and responds"]
     WHICH -->|complaint| P1 --> P2 --> P3
@@ -218,7 +224,7 @@ flowchart TD
     S2{"All details<br/>provided?"}
     S3["<b>Ask customer for missing info</b><br/>waiting on customer"]
     S4["<b>Customer replies</b>"]
-    S5["<b>Routed + confirmation sent</b><br/>reference number · SLA timer"]
+    S5["<b>Routed + confirmation drafted</b><br/>reference number · 5-day due date"]
     S6["<b>Team completes request</b>"]
     WHICH -->|service| S1 --> S2
     S2 -->|no| S3 --> S4
@@ -228,17 +234,16 @@ flowchart TD
     %% General enquiry
     E1["<b>General enquiry</b><br/>FAQ searched"]
     E2{"Good FAQ<br/>match?"}
-    E3["<b>Answer sent with source</b><br/>no invented policy"]
+    E3["<b>FAQ answer drafted with source</b><br/>exact FAQ text, no invented policy"]
     WHICH -->|enquiry| E1 --> E2
     E2 -->|yes| E3
 
     %% Human review
-    R1["<b>Human review queue</b><br/>unclear · low confidence<br/>injection · no FAQ match"]
-    R2["<b>Reviewer reclassifies</b><br/>or replies directly"]
+    R1["<b>Human review queue</b><br/>unclear · low confidence · injection<br/>AI error · no FAQ match"]
+    R2["<b>Reviewer handles the case</b><br/>approves or edits any draft"]
     WHICH -->|unclear / low confidence| R1
     E2 -.->|no| R1
     R1 --> R2
-    R2 -.->|re-routed| WHICH
 
     DONE["<b>Case resolved</b><br/>every step and approval is in the decision log"]
     C4 & H4 & P3 & S6 & E3 & R2 --> DONE
@@ -259,11 +264,6 @@ flowchart TD
     class WHICH,C2,H2,S2,E2 decision
     class DONE done
 ```
-
-The second diagram shows the intended operating process. Three of its boxes are not built in
-this POC: the app lets a reviewer edit and approve, but not reclassify a case or re-route it;
-nothing is actually sent to a customer; and the complaint acknowledgement target is one
-calendar day, not one business day (see [limitations](#7-assumptions-and-limitations)).
 
 ### Code map
 
@@ -383,8 +383,9 @@ response date only for the 21-day statutory clock; the 10-day target stays inter
 - **Failures are safe.** If the LLM call fails or returns invalid output after one retry, the
   classifier returns an "LLM error" result and the pipeline carries on to human review. The
   pipeline never raises on an LLM failure.
-- **Cache.** Every LLM answer is stored on disk, keyed by model, prompts and schema. Evals are
-  reproducible and free to re-run, which matters on a free tier.
+- **Cache, committed.** Every LLM answer is stored on disk, keyed by model, prompts and schema.
+  The answers for the dev and test requests are committed in `data/llm_cache/`, so anyone can
+  reproduce the evaluation and the demo without a key. A key is only asked for on a cache miss.
 - **An approval is never overwritten.** Processing a request again replaces its record, unless
   a reviewer has already approved it. Then it is skipped and counted.
 

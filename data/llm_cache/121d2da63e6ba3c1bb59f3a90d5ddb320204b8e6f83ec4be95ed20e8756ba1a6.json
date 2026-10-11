@@ -1,0 +1,15 @@
+{
+  "request_type": "general_enquiry",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Receive the SWIFT code for international money transfers from the UK",
+    "summary": "The customer wants to know the bank's SWIFT code for receiving money from the UK."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is asking for information only and nothing needs to be actioned on their account."
+}

@@ -1,0 +1,17 @@
+{
+  "request_type": "service_request",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": "everyday account",
+    "desired_outcome": "Cancel the direct debit to FitLife Gym",
+    "summary": "The customer wants to cancel a direct debit to FitLife Gym on their everyday account."
+  },
+  "missing_info": [
+    "account number"
+  ],
+  "confidence": 1.0,
+  "rationale": "The customer is asking the bank to perform an action on their account by cancelling a direct debit."
+}

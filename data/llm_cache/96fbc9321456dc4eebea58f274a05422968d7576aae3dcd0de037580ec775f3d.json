@@ -1,0 +1,20 @@
+{
+  "request_type": "service_request",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Change surname on accounts",
+    "summary": "The customer wants to update their surname on their accounts following a marriage."
+  },
+  "missing_info": [
+    "account number",
+    "old surname",
+    "new surname",
+    "marriage certificate"
+  ],
+  "confidence": 0.95,
+  "rationale": "The customer is asking to update their profile details on their account."
+}

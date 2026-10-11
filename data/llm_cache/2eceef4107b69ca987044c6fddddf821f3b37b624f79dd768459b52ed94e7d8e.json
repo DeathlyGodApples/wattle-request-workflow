@@ -1,0 +1,17 @@
+{
+  "request_type": "service_request",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "change card PIN",
+    "summary": "The customer wants to know how to change their card PIN."
+  },
+  "missing_info": [
+    "card details or account number"
+  ],
+  "confidence": 0.95,
+  "rationale": "The customer is asking to perform an action on their account, which constitutes a service request."
+}

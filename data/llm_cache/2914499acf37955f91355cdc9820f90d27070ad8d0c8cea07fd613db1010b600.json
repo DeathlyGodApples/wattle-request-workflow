@@ -1,0 +1,18 @@
+{
+  "request_type": "critical",
+  "product": "unknown",
+  "risk_flags": [
+    "self_harm",
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": null,
+    "summary": "The customer expresses feelings of hopelessness regarding their debt."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer message contains explicit signs that they may harm themselves or see no point in going on."
+}

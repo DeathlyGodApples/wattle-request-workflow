@@ -1,0 +1,19 @@
+{
+  "request_type": "critical",
+  "product": "transaction_account",
+  "risk_flags": [
+    "fraud",
+    "scam",
+    "unauthorised_transaction"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "investigate and address unauthorised transfers resulting from a remote access scam",
+    "summary": "The customer was scammed into installing a remote access app, leading to unauthorised transfers from their account."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The request involves a scam and unauthorised transactions, which is classified as critical."
+}

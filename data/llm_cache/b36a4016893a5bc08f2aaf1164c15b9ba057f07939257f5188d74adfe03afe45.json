@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "home_loan",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "A mortgage repayment variation for the next six months due to separation and reduced income",
+    "summary": "The customer separated from their partner and is requesting a mortgage variation because they can only manage half the repayments on one income."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer states they cannot meet their home loan repayments due to a separation and reduced income, and is asking for financial relief."
+}

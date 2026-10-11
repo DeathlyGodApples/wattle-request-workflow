@@ -1,0 +1,17 @@
+{
+  "request_type": "service_request",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Update address to 12 Wattle Street, Brunswick VIC 3056",
+    "summary": "The customer wants to update their home address."
+  },
+  "missing_info": [
+    "account number"
+  ],
+  "confidence": 1.0,
+  "rationale": "The customer wants a specific change made to their profile details."
+}

@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "credit_card",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": "$50",
+    "date": null,
+    "account_hint": "credit card",
+    "desired_outcome": "payment plan for the credit card of about $50 a fortnight",
+    "summary": "The customer is in financial difficulty and is requesting a payment plan of $50 a fortnight for their credit card."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer cannot meet payments due to financial trouble and is asking for a payment plan."
+}

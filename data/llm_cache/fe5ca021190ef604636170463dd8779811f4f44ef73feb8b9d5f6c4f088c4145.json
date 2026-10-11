@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "transaction_account",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": "everyday account",
+    "desired_outcome": "Waive the monthly fee for a few months",
+    "summary": "The customer is between jobs and wants their account monthly fee waived for a few months."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "The customer cannot meet fees due to job loss and is asking for financial relief."
+}

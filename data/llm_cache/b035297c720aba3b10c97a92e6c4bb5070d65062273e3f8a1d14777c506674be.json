@@ -1,0 +1,15 @@
+{
+  "request_type": "general_enquiry",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Find out the BSB for the Melbourne CBD branch",
+    "summary": "The customer is asking for the BSB number of the Melbourne CBD branch."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is only asking for information about a bank branch and nothing needs to be actioned on an account."
+}

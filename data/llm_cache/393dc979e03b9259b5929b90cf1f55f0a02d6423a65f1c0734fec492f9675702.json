@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "home_loan",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "formal complaint",
+    "summary": "The customer is making a formal complaint regarding repeated delays and lost documents during their home loan application process."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer explicitly states they want to make a formal complaint about service issues and delays with their home loan application."
+}

@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "transaction_account",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": "everyday account",
+    "desired_outcome": "Help with overdrawn account and dishonour fees due to inability to cover costs.",
+    "summary": "The customer is experiencing financial difficulty with their everyday account and is requesting assistance."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "The customer cannot meet fees due to their financial circumstances and is asking for help."
+}

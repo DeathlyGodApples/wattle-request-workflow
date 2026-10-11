@@ -1,0 +1,17 @@
+{
+  "request_type": "service_request",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Update home address to 7/44 Glenferrie Road, Hawthorn VIC 3122",
+    "summary": "The customer wants to update their address on their account."
+  },
+  "missing_info": [
+    "account number"
+  ],
+  "confidence": 1.0,
+  "rationale": "The customer is explicitly asking to update their home address on their account."
+}

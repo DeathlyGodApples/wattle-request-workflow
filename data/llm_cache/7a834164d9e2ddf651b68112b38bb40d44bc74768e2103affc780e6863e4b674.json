@@ -1,0 +1,15 @@
+{
+  "request_type": "critical",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "lock everything",
+    "summary": "The customer wants all accounts locked because their phone with the banking app was stolen."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is reporting a lost or stolen device with an active banking session, which falls under the critical request type."
+}

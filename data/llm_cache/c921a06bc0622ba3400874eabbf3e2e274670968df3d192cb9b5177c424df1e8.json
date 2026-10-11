@@ -1,0 +1,15 @@
+{
+  "request_type": "general_enquiry",
+  "product": "savings",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Information on minimum amount and early withdrawal conditions for a term deposit",
+    "summary": "The customer is asking about the minimum amount and early withdrawal rules for a term deposit."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is asking for information only and no account action is required."
+}

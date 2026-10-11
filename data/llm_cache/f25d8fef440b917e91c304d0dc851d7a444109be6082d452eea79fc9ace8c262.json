@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "personal_loan",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "help with the personal loan repayment this month due to surgery hospital bills",
+    "summary": "The customer's mother cannot pay her personal loan this month due to medical expenses from surgery."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "The customer is asking for help with repayments because they cannot afford them due to medical bills."
+}

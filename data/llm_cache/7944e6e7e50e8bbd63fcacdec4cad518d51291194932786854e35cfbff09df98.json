@@ -1,0 +1,15 @@
+{
+  "request_type": "general_enquiry",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Know if the Chadstone branch is open on Saturdays",
+    "summary": "The customer is asking for the Saturday opening hours of the Chadstone branch."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is asking for branch information and requires no bank action on their account."
+}

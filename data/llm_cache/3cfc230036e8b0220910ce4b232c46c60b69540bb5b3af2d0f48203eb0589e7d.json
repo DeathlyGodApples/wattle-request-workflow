@@ -1,0 +1,15 @@
+{
+  "request_type": "general_enquiry",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Know if a joint account can be opened online or if a branch visit is required",
+    "summary": "The customer wants to know how to open a joint account with their partner."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "The customer is asking for information on how to open a joint account and no account action is requested yet."
+}

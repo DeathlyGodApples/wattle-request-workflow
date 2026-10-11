@@ -258,6 +258,24 @@ def test_gemini_throttles_to_the_requests_per_minute_limit() -> None:
     assert sleeps == [6.0]  # 60 s / 10 rpm, and the frozen clock says no time has passed
 
 
-def test_gemini_without_an_api_key_fails_with_llm_error() -> None:
-    with pytest.raises(LLMError, match="GEMINI_API_KEY"):
-        GeminiClient("test-model", api_key="")
+def test_gemini_without_an_api_key_fails_only_when_it_is_actually_called() -> None:
+    client = GeminiClient("test-model", api_key="")  # building it is not an error
+    with pytest.raises(LLMError, match="GEMINI_API_KEY is not set"):
+        client.generate_json("sys", "user", Answer)
+
+
+def test_no_key_and_a_cache_hit_works(tmp_path: Path) -> None:
+    # Store an answer using a working client, then read it back with no key at all.
+    with_key = CachedLLM(FakeLLM(echo_schema), model="m", cache_dir=tmp_path)
+    stored = with_key.generate_json("sys", "cached question", Answer)
+
+    no_key = CachedLLM(GeminiClient("m", api_key=""), model="m", cache_dir=tmp_path)
+
+    assert no_key.generate_json("sys", "cached question", Answer) == stored
+
+
+def test_no_key_and_a_cache_miss_says_the_key_is_missing(tmp_path: Path) -> None:
+    no_key = CachedLLM(GeminiClient("m", api_key=""), model="m", cache_dir=tmp_path)
+    with pytest.raises(LLMError, match="not in the answer cache"):
+        no_key.generate_json("sys", "never asked before", Answer)
+    assert list(tmp_path.iterdir()) == []  # a failure is never cached

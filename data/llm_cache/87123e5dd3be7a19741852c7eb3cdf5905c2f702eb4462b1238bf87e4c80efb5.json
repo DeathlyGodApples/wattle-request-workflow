@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": "$5",
+    "date": "March",
+    "account_hint": null,
+    "desired_outcome": "Refund the fees since March",
+    "summary": "The customer is complaining about an unexpected monthly account fee and wants a refund since March."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is expressing dissatisfaction with an incorrect fee and is explicitly asking for a refund and resolution."
+}

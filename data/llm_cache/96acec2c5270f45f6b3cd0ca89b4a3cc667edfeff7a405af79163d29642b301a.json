@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "To have the branch closure and lack of consultation put on record as a complaint",
+    "summary": "The customer is complaining about the closure of their local branch and the lack of consultation."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer explicitly states they are dissatisfied with a bank decision and want it logged as a complaint."
+}

@@ -1,0 +1,15 @@
+{
+  "request_type": "critical",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": "this morning",
+    "account_hint": null,
+    "desired_outcome": "cancel both cards urgently",
+    "summary": "The customer's wallet was stolen containing their debit and credit cards, and they want them cancelled urgently."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "Stolen cards and wallet incidents fall under the critical request type due to security concerns."
+}

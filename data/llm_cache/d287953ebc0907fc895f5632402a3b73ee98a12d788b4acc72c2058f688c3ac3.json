@@ -1,0 +1,18 @@
+{
+  "request_type": "critical",
+  "product": "savings",
+  "risk_flags": [
+    "fraud",
+    "financial_abuse"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": "Mum's account",
+    "desired_outcome": "Stop the unauthorised use of savings",
+    "summary": "The customer reports financial abuse and potential fraud on their mother's account by her brother."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The message involves financial abuse and unauthorised card usage on a vulnerable person's account, which is classified as critical."
+}

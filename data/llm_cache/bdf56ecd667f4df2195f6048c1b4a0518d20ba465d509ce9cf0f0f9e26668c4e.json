@@ -1,0 +1,17 @@
+{
+  "request_type": "critical",
+  "product": "transaction_account",
+  "risk_flags": [
+    "unauthorised_transaction"
+  ],
+  "extracted": {
+    "amount": "22.99",
+    "date": "06/10",
+    "account_hint": null,
+    "desired_outcome": "Clarify or address the unrecognised Netflix transaction.",
+    "summary": "The customer is asking about an unrecognised Netflix transaction on their account."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "The customer is reporting an unrecognised transaction, which falls under critical safety and fraud procedures."
+}

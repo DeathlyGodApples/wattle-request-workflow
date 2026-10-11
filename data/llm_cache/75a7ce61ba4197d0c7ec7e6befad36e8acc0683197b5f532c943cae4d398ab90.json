@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": "yesterday",
+    "account_hint": "late husband's account",
+    "desired_outcome": "an apology and someone to help me properly",
+    "summary": "The customer is complaining about rude and dismissive staff at the Box Hill branch and expects an apology and proper assistance."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is expressing dissatisfaction with the service received and expects an apology and a fix."
+}

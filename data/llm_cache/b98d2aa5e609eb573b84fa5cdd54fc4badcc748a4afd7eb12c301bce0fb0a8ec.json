@@ -1,0 +1,18 @@
+{
+  "request_type": "critical",
+  "product": "savings",
+  "risk_flags": [
+    "scam",
+    "unauthorised_transaction"
+  ],
+  "extracted": {
+    "amount": "$4,200",
+    "date": "20 minutes ago",
+    "account_hint": "savings",
+    "desired_outcome": "Report scam and unauthorised transaction",
+    "summary": "The customer was tricked into sharing a verification code, resulting in an unauthorised transfer of $4,200 from their savings account."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer was a victim of a scam involving an unauthorised transaction and lost funds, which falls under critical safety and fraud procedures."
+}

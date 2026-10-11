@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "home_loan",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "pausing repayments for a few months until I find work",
+    "summary": "The customer was made redundant and cannot make their home loan repayment next month, requesting a temporary pause on repayments."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is unable to meet repayments due to job loss and is seeking financial relief assistance."
+}

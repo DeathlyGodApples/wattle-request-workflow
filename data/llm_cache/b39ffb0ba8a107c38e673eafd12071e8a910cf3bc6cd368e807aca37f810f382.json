@@ -1,0 +1,17 @@
+{
+  "request_type": "service_request",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": "$10,000",
+    "date": "Saturday",
+    "account_hint": null,
+    "desired_outcome": "Increase daily transfer limit to $10,000",
+    "summary": "The customer wants to increase their daily transfer limit to $10,000 to pay a car deposit."
+  },
+  "missing_info": [
+    "account number"
+  ],
+  "confidence": 1.0,
+  "rationale": "The customer wants to change a feature on their account by increasing their daily transfer limit."
+}

@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "personal_loan",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "speak to someone about help with personal loan repayments due to a business downturn",
+    "summary": "The customer is experiencing financial difficulty due to a business downturn and wants to discuss relief for their personal loan repayments."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer cannot meet personal loan repayments due to reduced income from business troubles and is seeking hardship assistance."
+}

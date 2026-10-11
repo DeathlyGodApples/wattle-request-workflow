@@ -1,0 +1,18 @@
+{
+  "request_type": "service_request",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": "$30",
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Get a new card and have the $30 paper statement fee refunded/complained about",
+    "summary": "The customer wants a replacement debit card for a broken tap feature and is disputing a paper statement fee."
+  },
+  "missing_info": [
+    "account number",
+    "card details"
+  ],
+  "confidence": 0.8,
+  "rationale": "The customer is primarily requesting an actionable service (a new card), while also expressing a complaint, but the dominant operational task is updating the card."
+}

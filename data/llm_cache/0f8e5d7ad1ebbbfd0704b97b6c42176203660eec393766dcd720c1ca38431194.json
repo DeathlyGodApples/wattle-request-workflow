@@ -1,0 +1,19 @@
+{
+  "request_type": "service_request",
+  "product": "credit_card",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "add authorised user to credit card",
+    "summary": "The customer wants to add their wife as an additional cardholder on their credit card."
+  },
+  "missing_info": [
+    "credit card account number",
+    "wife's full name",
+    "wife's date of birth"
+  ],
+  "confidence": 1.0,
+  "rationale": "The customer is asking to add an additional cardholder to their account, which requires an action by the bank."
+}

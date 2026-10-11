@@ -1,0 +1,15 @@
+{
+  "request_type": "general_enquiry",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": "Docklands",
+    "desired_outcome": "Find the BSB for the Docklands branch",
+    "summary": "The customer is asking for the BSB number for the Docklands branch because they could not find it on the website."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is asking for information (a BSB number) and no account action needs to be taken by the bank."
+}

@@ -1,0 +1,15 @@
+{
+  "request_type": "general_enquiry",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Find out if there is a branch near Southland shopping centre",
+    "summary": "The customer is asking if there is a bank branch located near Southland shopping centre."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is asking for information about branch locations and does not require any action to be taken on an account."
+}

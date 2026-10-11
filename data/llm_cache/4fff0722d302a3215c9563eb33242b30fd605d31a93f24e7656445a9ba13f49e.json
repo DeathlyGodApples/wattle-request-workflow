@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": "$15",
+    "date": "3 October",
+    "account_hint": null,
+    "desired_outcome": "Refund the duplicate overseas transaction fee",
+    "summary": "The customer wants a refund for a duplicate $15 overseas transaction fee charged on 3 October."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "The customer is expressing dissatisfaction with an incorrect fee being charged twice and is asking for a specific fix."
+}

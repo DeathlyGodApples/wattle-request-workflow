@@ -1,0 +1,18 @@
+{
+  "request_type": "critical",
+  "product": "unknown",
+  "risk_flags": [
+    "scam",
+    "unauthorised_transaction"
+  ],
+  "extracted": {
+    "amount": "$12,000",
+    "date": "yesterday",
+    "account_hint": null,
+    "desired_outcome": "recover funds and check if the platform is legitimate",
+    "summary": "The customer transferred $12,000 to a suspected crypto scam platform via WhatsApp and wants to know if they can recover their money."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer describes a classic investment scam involving unauthorised transfers under deceptive circumstances, which is classified as a critical security issue."
+}

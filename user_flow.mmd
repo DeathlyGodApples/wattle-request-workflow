@@ -20,8 +20,8 @@ flowchart TD
 
     %% Hardship
     H1["<b>Hardship</b><br/>reply drafted, held for approval"]
-    H2{"Credit<br/>product?"}
-    H3A["<b>21-day legal clock</b><br/>credit product (NCC s72)"]
+    H2{"Credit product<br/>or unknown?"}
+    H3A["<b>21-day clock</b><br/>NCC s72 · date shown to customer"]
     H3B["<b>Internal deadline</b><br/>10 days"]
     H4["<b>Hardship team approves reply</b><br/>and agrees an arrangement"]
     WHICH -->|hardship| H1 --> H2
@@ -29,7 +29,7 @@ flowchart TD
     H2 -->|no| H3B --> H4
 
     %% Complaint
-    P1["<b>Complaint</b><br/>acknowledgement sent<br/>(1 business day target)"]
+    P1["<b>Complaint</b><br/>acknowledgement drafted<br/>due within 1 day"]
     P2["<b>Summary to complaints team</b><br/>30-day clock starts"]
     P3["<b>Complaints officer</b><br/>investigates and responds"]
     WHICH -->|complaint| P1 --> P2 --> P3
@@ -39,7 +39,7 @@ flowchart TD
     S2{"All details<br/>provided?"}
     S3["<b>Ask customer for missing info</b><br/>waiting on customer"]
     S4["<b>Customer replies</b>"]
-    S5["<b>Routed + confirmation sent</b><br/>reference number · SLA timer"]
+    S5["<b>Routed + confirmation drafted</b><br/>reference number · 5-day due date"]
     S6["<b>Team completes request</b>"]
     WHICH -->|service| S1 --> S2
     S2 -->|no| S3 --> S4
@@ -49,17 +49,16 @@ flowchart TD
     %% General enquiry
     E1["<b>General enquiry</b><br/>FAQ searched"]
     E2{"Good FAQ<br/>match?"}
-    E3["<b>Answer sent with source</b><br/>no invented policy"]
+    E3["<b>FAQ answer drafted with source</b><br/>exact FAQ text, no invented policy"]
     WHICH -->|enquiry| E1 --> E2
     E2 -->|yes| E3
 
     %% Human review
-    R1["<b>Human review queue</b><br/>unclear · low confidence<br/>injection · no FAQ match"]
-    R2["<b>Reviewer reclassifies</b><br/>or replies directly"]
+    R1["<b>Human review queue</b><br/>unclear · low confidence · injection<br/>AI error · no FAQ match"]
+    R2["<b>Reviewer handles the case</b><br/>approves or edits any draft"]
     WHICH -->|unclear / low confidence| R1
     E2 -.->|no| R1
     R1 --> R2
-    R2 -.->|re-routed| WHICH
 
     DONE["<b>Case resolved</b><br/>every step and approval is in the decision log"]
     C4 & H4 & P3 & S6 & E3 & R2 --> DONE

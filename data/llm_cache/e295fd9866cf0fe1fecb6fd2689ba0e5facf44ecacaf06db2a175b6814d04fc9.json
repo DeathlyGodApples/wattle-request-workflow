@@ -1,0 +1,15 @@
+{
+  "request_type": "general_enquiry",
+  "product": "credit_card",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Learn how to check rewards points balance on credit card",
+    "summary": "The customer wants to know how to check their credit card rewards points."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is asking for information on how to check rewards points without needing any action performed on their account."
+}

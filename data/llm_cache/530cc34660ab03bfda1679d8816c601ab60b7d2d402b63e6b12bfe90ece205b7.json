@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "car_loan",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Explore options for hardship assistance regarding car loan payments.",
+    "summary": "The customer's work hours have been cut in half, leaving them behind on two car loan payments and seeking options for assistance."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is unable to meet repayments due to reduced income from job hours being cut and is asking for relief options."
+}

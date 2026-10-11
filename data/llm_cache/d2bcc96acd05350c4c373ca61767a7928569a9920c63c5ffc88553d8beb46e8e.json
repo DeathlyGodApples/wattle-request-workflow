@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "unknown",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": "August",
+    "account_hint": null,
+    "desired_outcome": "help with repayments due to job loss and review of late fees",
+    "summary": "The customer is experiencing financial difficulty following job loss and cannot keep up with repayments."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "The customer explicitly states they lost their job and cannot keep up with repayments, which indicates financial hardship."
+}

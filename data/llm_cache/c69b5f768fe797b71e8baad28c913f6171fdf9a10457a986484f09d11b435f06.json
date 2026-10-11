@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": "$640",
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Want the chargeback decision reviewed",
+    "summary": "The customer is dissatisfied that their chargeback dispute for an airline cancellation was rejected without explanation and wants it reviewed."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "The customer is expressing dissatisfaction with a decision made by the bank regarding a chargeback and is asking for a review."
+}

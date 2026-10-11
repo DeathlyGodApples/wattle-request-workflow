@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": "yesterday",
+    "account_hint": null,
+    "desired_outcome": null,
+    "summary": "The customer is complaining about repeatedly being put on hold and cut off by the phone service."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is expressing dissatisfaction with the bank's phone service after being cut off."
+}

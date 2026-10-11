@@ -75,7 +75,7 @@ A proof-of-concept that receives customer requests for a fictional Australian re
 - Python **3.11+**
 - `streamlit`, `pydantic>=2`, `pandas`, `python-dotenv`
 - LLM SDK: **`google-genai`** (Gemini, free tier) as the default provider
-  - Model name comes from env `LLM_MODEL` (default: the current Gemini **Flash** model — check the SDK docs for the current name; do not hard-code it elsewhere).
+  - Model name comes from env `LLM_MODEL`; do not hard-code it outside `config.py`. The default is `gemini-3.5-flash-lite` (changed in M7 from `gemini-3.8-flash`): it is the model the committed cache and the published results were made with, so a clone with no `.env` hits the cache.
   - Use the SDK's JSON / response-schema mode with the Pydantic model where supported; still validate with Pydantic after.
 - Dev: `pytest`, `ruff`
 - Storage: `sqlite3` (stdlib)
@@ -96,13 +96,14 @@ wattle-request-workflow/
 ├── requirements-dev.txt
 ├── pyproject.toml            # ruff + pytest config
 ├── .env.example              # GEMINI_API_KEY=, LLM_MODEL=, CONFIDENCE_THRESHOLD=0.7
-├── .gitignore                # .env, .cache/, *.db, __pycache__/, results/raw/
+├── .gitignore                # .env, .cache/ (old local cache), *.db, __pycache__/, results/raw/
 ├── app.py                    # Streamlit entry point
 ├── eval.py                   # evaluation CLI
 ├── data/
 │   ├── dev_requests.jsonl    # 20 labelled — tuning & few-shot ONLY
 │   ├── test_requests.jsonl   # 58 labelled — held-out, NEVER in prompts
-│   └── faq.json              # 15 FAQ entries
+│   ├── faq.json              # 15 FAQ entries
+│   └── llm_cache/            # committed LLM answers for the dev + test requests (see §9)
 ├── wattle/
 │   ├── __init__.py
 │   ├── config.py             # env loading, constants
@@ -199,7 +200,8 @@ class LLMClient(Protocol):
 ```
 
 - `GeminiClient`: temperature 0; JSON/schema mode; validate with Pydantic; on 429/5xx retry with exponential backoff (max 3); simple client-side throttle (`LLM_RPM` env, default 10).
-- **Cache**: wrap any client in `CachedLLM` keyed by `sha256(model + system + user + schema name)`, stored as JSON under `.cache/llm/`. Re-running eval must not re-call the API.
+- **Cache**: wrap any client in `CachedLLM` keyed by `sha256(model + system + user + schema name)`, stored as JSON under `data/llm_cache/` (tracked in git since M7, see §9). Re-running eval must not re-call the API.
+- **Missing key:** building a `GeminiClient` without `GEMINI_API_KEY` is not an error. The error (`LLMError`) is raised only when a real call is needed, i.e. on a cache miss, so cached requests work with no key.
 - `FakeLLM`: returns pre-programmed objects keyed by a substring match or a callable. Used in all unit tests.
 
 ---
@@ -376,7 +378,8 @@ python eval.py --set dev|test [--no-rules] [--limit N]
 
 - `main` only is fine. Commit at the end of each milestone (more often is fine).
 - Conventional Commits: `feat:`, `fix:`, `test:`, `docs:`, `refactor:`, `chore:`.
-- Never commit `.env`, `.cache/`, `*.db`, `results/raw/`.
+- Never commit `.env`, `*.db`, `results/raw/`.
+- **The LLM cache is committed** (decision in M7). `data/llm_cache/` holds the model's answers to the synthetic dev and test requests, one small JSON file per call, named by a hash of the model and prompt. It contains no secrets and no real customer data, and it makes the demo and both evaluations reproducible without an API key. Commit only entries for the dev and test requests. After changing a prompt, the FAQ or the model, re-run the evals and commit the new entries (a unit test fails if a dev request is no longer covered). The old local `.cache/` folder stays gitignored.
 
 ---
 

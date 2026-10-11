@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "home_loan",
+  "risk_flags": [],
+  "extracted": {
+    "amount": "$2,800",
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "want it reviewed",
+    "summary": "The customer is dissatisfied with an undisclosed break fee charged during refinancing and wants it reviewed."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is expressing dissatisfaction with a fee and expects a review and response."
+}

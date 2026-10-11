@@ -1,0 +1,17 @@
+{
+  "request_type": "unclear",
+  "product": "unknown",
+  "risk_flags": [
+    "prompt_injection"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": null,
+    "summary": "The customer message contains a prompt injection attempt and no valid banking request."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The message is a clear prompt injection attempt without any genuine customer request."
+}

@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "credit_card",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "help with repayments due to divorce",
+    "summary": "The customer has missed credit card payments due to a divorce and cannot pay the full minimum."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is unable to meet credit card payments due to life circumstances and is seeking assistance with repayments."
+}

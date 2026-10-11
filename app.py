@@ -18,7 +18,7 @@ import streamlit as st
 
 from wattle import config, data, db, llm
 from wattle.deadlines import now_local
-from wattle.llm import LLMClient, LLMError
+from wattle.llm import LLMClient
 from wattle.models import CaseStatus, Request, SendMode
 from wattle.pipeline import process
 
@@ -122,6 +122,16 @@ def _plain(value: object) -> str:
     if isinstance(value, list):
         return ", ".join(str(item) for item in value)
     return str(value)
+
+
+def llm_failure_note(case: Case) -> str | None:
+    """The LLM error behind a case, if a call failed, so the page can say so plainly."""
+    if case["rationale"].startswith("LLM error:"):
+        return case["rationale"]
+    for step in case.get("steps", []):
+        if step["detail"].get("llm_error"):
+            return str(step["detail"].get("reason"))
+    return None
 
 
 def summary_table(cases: Sequence[Case]) -> pd.DataFrame:
@@ -238,15 +248,26 @@ def page_process(use_rules: bool) -> None:
         batch_ids = st.session_state["last_batch_ids"]
         cases = [c for c in db.list_cases(db_path=config.DB_PATH) if c["id"] in batch_ids]
         st.dataframe(summary_table(cases), hide_index=True)
+        failed = [c["id"] for c in cases if llm_failure_note(c)]
+        if failed:
+            st.error(f"The LLM call failed for {len(failed)} request(s): {', '.join(failed)}.")
     case = db.get_case(st.session_state.get("last_case_id", ""), db_path=config.DB_PATH)
     if case is not None:
         st.divider()
+        _render_llm_failure(case)
         render_card(case)
+
+
+def _render_llm_failure(case: Case) -> None:
+    """Say plainly when the LLM call failed (for example no API key and no cached answer)."""
+    note = llm_failure_note(case)
+    if note:
+        st.error(f"The LLM call failed, so the safe path was taken. {note}")
 
 
 def _process_one(req: Request, use_rules: bool) -> None:
     """Handle the Process button; an approved case is shown as it stands, not re-run."""
-    saved = process_and_log(req, _llm_or_stop(), use_rules=use_rules, db_path=config.DB_PATH)
+    saved = process_and_log(req, get_llm(), use_rules=use_rules, db_path=config.DB_PATH)
     if not saved:
         st.warning(f"{req.id} is already approved, so it was not processed again.")
     st.session_state["last_case_id"] = req.id
@@ -257,11 +278,10 @@ def _process_file(file_name: str, use_rules: bool) -> None:
     """Handle the Process all button, with a progress bar because uncached calls are slow."""
     rows = data.load_dev() if file_name == "dev" else data.load_test()
     requests = [row.to_request() for row in rows]
-    client = _llm_or_stop()  # before the progress bar, so a missing key leaves no stuck bar
     bar = st.progress(0.0, text=f"Processing {len(requests)} requests")
     skipped = process_all(
         requests,
-        client,
+        get_llm(),
         use_rules=use_rules,
         db_path=config.DB_PATH,
         on_progress=lambda done: bar.progress(done / len(requests)),
@@ -274,16 +294,6 @@ def _process_file(file_name: str, use_rules: bool) -> None:
     )
     st.session_state["last_batch_ids"] = [req.id for req in requests]
     st.session_state.pop("last_case_id", None)
-
-
-def _llm_or_stop() -> LLMClient:
-    """The LLM client, or a clear message (for example when the API key is missing)."""
-    try:
-        return get_llm()
-    except LLMError as exc:
-        # The key is read once at start-up, so a fixed .env needs a restart to take effect.
-        st.error(f"{exc} Then restart the app.")
-        st.stop()
 
 
 def page_review() -> None:

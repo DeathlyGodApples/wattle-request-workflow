@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "car_loan",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "help with car loan repayments",
+    "summary": "The customer cannot work for three months due to a car accident and requests assistance with their car loan repayments."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is unable to make repayments due to reduced income from an accident and explicitly asks for hardship assistance."
+}

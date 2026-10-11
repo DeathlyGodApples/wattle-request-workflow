@@ -1,0 +1,15 @@
+{
+  "request_type": "unclear",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": "$1,000",
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": null,
+    "summary": "The message is a phishing or promotional spam email offering a gift card."
+  },
+  "missing_info": [],
+  "confidence": 0.9,
+  "rationale": "The message is spam or a phishing attempt rather than a genuine customer request."
+}

@@ -14,6 +14,7 @@ import app
 from helpers import NOW, make_classification, make_request, scripted_llm
 from wattle import db
 from wattle.llm import FakeLLM
+from wattle.llm import GeminiClient as RealGeminiClient
 from wattle.models import FaqSelection
 
 FAQ_PICK = FaqSelection(faq_id="FAQ-02", confidence=0.9)
@@ -250,23 +251,67 @@ def test_reset_demo_data_empties_the_log(run_app: AppTest, db_path: Path) -> Non
     assert db.list_cases(db_path=db_path) == []
 
 
-def test_a_missing_api_key_is_explained_instead_of_crashing(
-    run_app: AppTest, monkeypatch: pytest.MonkeyPatch
+def test_a_failed_llm_call_is_explained_and_the_safe_path_is_taken(
+    run_app: AppTest, db_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    def no_key() -> FakeLLM:
-        raise app.LLMError("GEMINI_API_KEY is not set. Add it to your .env file.")
-
-    monkeypatch.setattr("wattle.llm.GeminiClient", no_key)
+    monkeypatch.setattr("wattle.llm.GeminiClient", lambda: FakeLLM())  # every call fails
     at = run_app.run()
+    at.radio(key="source").set_value("Paste custom text").run()
+    at.text_area(key="custom_text").set_value("Where is my new card?").run()
     button(at, "Process").click().run()
-    assert not at.exception
-    assert "GEMINI_API_KEY is not set" in at.error[0].value
-    assert "restart the app" in at.error[0].value
 
-    at.run()  # st.stop() cut the last run short, so draw the whole page again first
-    button(at, "Process all samples").click().run()
+    assert not at.exception
+    assert "The LLM call failed, so the safe path was taken." in at.error[0].value
+    (case,) = db.list_cases(db_path=db_path)
+    assert case["final_type"] == "human_review"
+    assert case["rules_fired"] == ["R0", "R4"]
+
+
+def test_the_demo_works_with_no_api_key_from_the_committed_cache(
+    db_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # The real cache and the real Gemini client, but with no key: DEV-001 is a cache hit.
+    monkeypatch.setattr("wattle.config.DB_PATH", str(db_path))
+    monkeypatch.setattr("wattle.config.LLM_MODEL", app.config.DEFAULT_LLM_MODEL)
+    monkeypatch.setattr("wattle.llm.GeminiClient", lambda: RealGeminiClient(api_key=""))
+    st.cache_resource.clear()
+    at = AppTest.from_file(app.__file__, default_timeout=10).run()
+    button(at, "Process").click().run()
+    st.cache_resource.clear()
+
+    assert not at.exception
+    assert not at.error
+    case = db.get_case("DEV-001", db_path=db_path)
+    assert case is not None
+    assert case["final_type"] == "critical"
+    assert not case["rationale"].startswith("LLM error")
+
+
+def test_no_api_key_and_no_cached_answer_says_the_key_is_missing(
+    db_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("wattle.config.DB_PATH", str(db_path))
+    monkeypatch.setattr("wattle.llm.GeminiClient", lambda: RealGeminiClient(api_key=""))
+    monkeypatch.setattr("wattle.llm.CachedLLM", lambda inner, model: inner)  # always a miss
+    st.cache_resource.clear()
+    at = AppTest.from_file(app.__file__, default_timeout=10).run()
+    button(at, "Process").click().run()
+    st.cache_resource.clear()
+
     assert not at.exception
     assert "GEMINI_API_KEY is not set" in at.error[0].value
+
+
+def test_llm_failure_note_reads_the_classifier_and_the_faq_step() -> None:
+    fine = {"rationale": "Explicit complaint.", "steps": [{"detail": {"llm_error": False}}]}
+    classify_failed = {"rationale": "LLM error: quota exceeded"}
+    faq_failed = {
+        "rationale": "An enquiry.",
+        "steps": [{"detail": {"llm_error": True, "reason": "LLM error: timeout"}}],
+    }
+    assert app.llm_failure_note(fine) is None
+    assert app.llm_failure_note(classify_failed) == "LLM error: quota exceeded"
+    assert app.llm_failure_note(faq_failed) == "LLM error: timeout"
 
 
 def test_customer_and_llm_text_is_never_rendered_as_markdown(

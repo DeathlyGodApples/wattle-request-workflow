@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": "$3,000",
+    "date": "five days ago",
+    "account_hint": null,
+    "desired_outcome": "the transfer to arrive or an explanation for the delay",
+    "summary": "The customer is complaining that a $3,000 transfer to their landlord made five days ago has still not arrived despite staff assurances."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "The customer is expressing strong dissatisfaction with the delay of a transfer and the service received, expecting a resolution and response."
+}

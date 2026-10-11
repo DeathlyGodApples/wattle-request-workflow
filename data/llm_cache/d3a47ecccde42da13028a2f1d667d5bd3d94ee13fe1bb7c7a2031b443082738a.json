@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "A response regarding their previous case after a three-week delay and lack of callbacks.",
+    "summary": "The customer is complaining about a lack of response and callbacks after three weeks regarding case 88213."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "The customer is expressing dissatisfaction with the service and lack of response to a previous issue."
+}

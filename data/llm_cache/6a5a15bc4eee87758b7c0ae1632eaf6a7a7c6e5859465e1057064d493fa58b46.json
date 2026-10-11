@@ -1,0 +1,15 @@
+{
+  "request_type": "general_enquiry",
+  "product": "savings",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": "online saver account",
+    "desired_outcome": "To know the current interest rate and whether there is a bonus rate on the online saver account.",
+    "summary": "The customer is asking for the current interest rate and bonus rate details for their online saver account."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is only asking for information about interest rates and does not require any account action."
+}

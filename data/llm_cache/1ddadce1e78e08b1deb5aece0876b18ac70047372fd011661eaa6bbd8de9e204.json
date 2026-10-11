@@ -1,0 +1,18 @@
+{
+  "request_type": "critical",
+  "product": "transaction_account",
+  "risk_flags": [
+    "unauthorised_transaction",
+    "fraud"
+  ],
+  "extracted": {
+    "amount": "$1.99 and $2.49",
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Report unrecognised transactions",
+    "summary": "The customer noticed two small unrecognised transactions on their account and wanted to mention them."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "Unrecognised or unauthorised transactions must be treated as critical to check for potential fraud."
+}

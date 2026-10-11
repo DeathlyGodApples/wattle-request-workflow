@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": "$10",
+    "date": "one week",
+    "account_hint": null,
+    "desired_outcome": "refund or removal of the duplicate dishonour fees",
+    "summary": "The customer is expressing sarcasm and dissatisfaction about being charged a $10 dishonour fee twice in one week."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "The customer is expressing clear dissatisfaction with bank fees and expects a response or correction."
+}

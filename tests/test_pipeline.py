@@ -7,8 +7,8 @@ from datetime import timedelta
 import pytest
 
 from helpers import NOW, make_classification, make_request, scripted_llm
-from wattle import data
-from wattle.llm import FakeLLM
+from wattle import config, data
+from wattle.llm import CachedLLM, FakeLLM, GeminiClient
 from wattle.models import CaseStatus, Classification, FaqSelection, FinalType, SendMode
 from wattle.pipeline import process
 
@@ -193,3 +193,19 @@ def test_no_dev_request_raises_or_auto_sends_past_the_human_gate() -> None:
                 if result.decision.requires_human:
                     modes = [d.send_mode for d in result.branch.drafts]
                     assert SendMode.AUTO not in modes
+
+
+@pytest.mark.parametrize("use_rules", [True, False], ids=["with rules", "AI only"])
+def test_every_dev_request_runs_from_the_committed_cache_with_no_api_key(use_rules: bool) -> None:
+    # If this fails after a prompt or model change, re-run the evals and commit the new cache.
+    no_key = GeminiClient(config.DEFAULT_LLM_MODEL, api_key="")
+    llm = CachedLLM(no_key, model=config.DEFAULT_LLM_MODEL, cache_dir=config.CACHE_DIR)
+    before = sorted(path.name for path in config.CACHE_DIR.iterdir())
+
+    for row in data.load_dev():
+        result = process(row.to_request(), llm, use_rules=use_rules, now=NOW)
+        assert result.classification.llm_error is False, f"{row.id} is not in the cache"
+        faq_failed = [s for s in result.branch.steps if s.detail.get("llm_error")]
+        assert faq_failed == [], f"the FAQ answer for {row.id} is not in the cache"
+
+    assert sorted(path.name for path in config.CACHE_DIR.iterdir()) == before  # nothing written

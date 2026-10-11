@@ -11,11 +11,14 @@ load_dotenv()
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "data"
-CACHE_DIR = ROOT_DIR / ".cache" / "llm"
+# Tracked in git: model answers to the synthetic dev and test requests, so the demo and
+# the evaluation run without an API key. It holds no secrets.
+CACHE_DIR = DATA_DIR / "llm_cache"
 RESULTS_DIR = ROOT_DIR / "results"
 
 # Pinned id (not the "-latest" alias) so cached eval runs stay reproducible.
-DEFAULT_LLM_MODEL = "gemini-3.8-flash"
+# It is also the model the committed cache and the published results were made with.
+DEFAULT_LLM_MODEL = "gemini-3.5-flash-lite"
 
 # `or` (not a getenv default) so an empty value in .env falls back to the default.
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY") or ""

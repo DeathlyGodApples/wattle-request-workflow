@@ -1,0 +1,15 @@
+{
+  "request_type": "general_enquiry",
+  "product": "home_loan",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Get the current variable rate for owner-occupiers",
+    "summary": "The customer is asking for the current variable home loan rate for owner-occupiers."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is only asking for information about current rates and no action needs to be taken on an account."
+}

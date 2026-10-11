@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "home_loan",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "talk to someone about lowering home loan repayments for a while due to reduced income",
+    "summary": "The customer is experiencing reduced income and wants to discuss temporarily lowering their home loan repayments."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer cannot meet repayments due to reduced hours and is asking for payment relief."
+}

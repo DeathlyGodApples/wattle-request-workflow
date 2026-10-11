@@ -23,6 +23,10 @@ logger = logging.getLogger(__name__)
 MAX_RETRIES = 3
 BACKOFF_SECONDS = 5  # doubles each retry: 5 s, 10 s, 20 s
 REQUEST_TIMEOUT_MS = 120_000
+MISSING_KEY_MESSAGE = (
+    "GEMINI_API_KEY is not set and this request is not in the answer cache. "
+    "Add a key to your .env file and start again."
+)
 
 # Everything the SDK can raise for a failed call: API errors, a non-JSON reply (for example a
 # proxy's HTML error page), and network or timeout errors from its httpx transport.
@@ -149,9 +153,8 @@ class GeminiClient:
         sleep: Callable[[float], None] = time.sleep,
         clock: Callable[[], float] = time.monotonic,
     ) -> None:
-        if client is None and not api_key:
-            raise LLMError("GEMINI_API_KEY is not set. Add it to your .env file.")
         self.model = model
+        # A missing key is not an error yet: behind a cache this client may never be called.
         self._client = client if client is not None else _build_sdk_client(api_key)
         self._min_interval = 60.0 / rpm if rpm > 0 else 0.0
         self._sleep = sleep
@@ -160,6 +163,8 @@ class GeminiClient:
 
     def generate_json(self, system: str, user: str, schema: type[BaseModel]) -> BaseModel:
         """Call Gemini and validate the reply; every failure surfaces as LLMError."""
+        if self._client is None:
+            raise LLMError(MISSING_KEY_MESSAGE)
         text = self._call_with_retries(system, user, schema)
         if not text:
             raise LLMError("Gemini returned no text (the response may have been blocked).")
@@ -202,8 +207,13 @@ class GeminiClient:
         self._last_call = now
 
 
-def _build_sdk_client(api_key: str) -> genai.Client:
-    """Set a request timeout: the SDK's default is none, so a stalled call would hang forever."""
+def _build_sdk_client(api_key: str) -> genai.Client | None:
+    """The SDK client, or None without a key; a real call then fails with a clear message.
+
+    A request timeout is set because the SDK's default is none: a stalled call would hang.
+    """
+    if not api_key:
+        return None
     options = types.HttpOptions(timeout=REQUEST_TIMEOUT_MS)
     return genai.Client(api_key=api_key, http_options=options)
 

@@ -1,0 +1,17 @@
+{
+  "request_type": "service_request",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Update mobile number to 0412 555 019",
+    "summary": "The customer wants to update their mobile phone number on their profile."
+  },
+  "missing_info": [
+    "account number"
+  ],
+  "confidence": 1.0,
+  "rationale": "The customer is asking for a change to be made on their customer profile details."
+}

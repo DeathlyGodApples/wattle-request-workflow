@@ -1,0 +1,18 @@
+{
+  "request_type": "critical",
+  "product": "transaction_account",
+  "risk_flags": [
+    "unauthorised_transaction",
+    "fraud"
+  ],
+  "extracted": {
+    "amount": "$1,840",
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "investigate and address unauthorised transactions",
+    "summary": "The customer is reporting three unauthorised payments totalling $1,840 made from their account to an online store in Singapore."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer reports unauthorised transactions on their account, which falls under the critical request type."
+}

@@ -1,0 +1,17 @@
+{
+  "request_type": "service_request",
+  "product": "home_loan",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": "2025–26",
+    "account_hint": null,
+    "desired_outcome": "Email home loan statements for the 2025-26 financial year",
+    "summary": "The customer wants to receive their home loan statements for the 2025-26 financial year via email."
+  },
+  "missing_info": [
+    "account number"
+  ],
+  "confidence": 0.95,
+  "rationale": "The customer is asking for an action to be performed on their account by requesting copies of their statements."
+}

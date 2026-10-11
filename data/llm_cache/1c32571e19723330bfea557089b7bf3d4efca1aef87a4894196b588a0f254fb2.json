@@ -1,0 +1,18 @@
+{
+  "request_type": "critical",
+  "product": "personal_loan",
+  "risk_flags": [
+    "fraud",
+    "unauthorised_transaction"
+  ],
+  "extracted": {
+    "amount": "$15,000",
+    "date": null,
+    "account_hint": "personal loan",
+    "desired_outcome": "investigate and remove the unapplied personal loan from the profile",
+    "summary": "The customer reports an unknown personal loan of $15,000 on their profile and suspects identity theft."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is reporting an unauthorised loan and suspected identity theft, which falls under critical safety and fraud guidelines."
+}

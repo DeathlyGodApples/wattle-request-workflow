@@ -1,0 +1,18 @@
+{
+  "request_type": "service_request",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "resend replacement card to current address",
+    "summary": "The customer wants a replacement card sent to their current address because their expired card has not arrived."
+  },
+  "missing_info": [
+    "account number",
+    "current address"
+  ],
+  "confidence": 1.0,
+  "rationale": "The customer is asking for a new replacement card to be sent to them."
+}

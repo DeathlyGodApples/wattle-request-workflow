@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "credit_card",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "apply for some kind of hardship arrangement",
+    "summary": "The customer cannot pay their credit card for a few months due to stopping work to care for their mum and wants to apply for a hardship arrangement."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer explicitly states they cannot meet payments due to a change in circumstances and requests a hardship arrangement."
+}

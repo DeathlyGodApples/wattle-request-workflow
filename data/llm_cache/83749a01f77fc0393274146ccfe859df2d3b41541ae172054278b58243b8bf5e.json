@@ -1,0 +1,15 @@
+{
+  "request_type": "unclear",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": null,
+    "summary": "The customer sent a test message with no actionable request."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The message only contains the word 'test' and lacks sufficient context or a specific request."
+}

@@ -1,0 +1,15 @@
+{
+  "request_type": "complaint",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Sort out why the card keeps getting declined when there is money in the account",
+    "summary": "The customer is complaining that their debit card has been declined multiple times despite having funds."
+  },
+  "missing_info": [],
+  "confidence": 0.95,
+  "rationale": "The customer is expressing strong dissatisfaction with repeated card declines and expects the bank to fix the issue."
+}

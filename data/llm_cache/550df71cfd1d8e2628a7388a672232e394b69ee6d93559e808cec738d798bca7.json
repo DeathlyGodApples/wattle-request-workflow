@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "home_loan",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": "last week",
+    "account_hint": null,
+    "desired_outcome": "talk to someone about mortgage and car loan repayments because they cannot pay right now",
+    "summary": "The customer is experiencing financial difficulty due to flood damage and needs assistance with their mortgage and car loan payments."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer cannot meet their loan repayments due to a natural disaster and is seeking financial hardship relief."
+}

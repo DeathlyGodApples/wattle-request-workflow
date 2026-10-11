@@ -1,0 +1,18 @@
+{
+  "request_type": "critical",
+  "product": "transaction_account",
+  "risk_flags": [
+    "fraud",
+    "unauthorised_transaction"
+  ],
+  "extracted": {
+    "amount": "$480",
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Report an unauthorised transaction and secure the card",
+    "summary": "The customer is reporting an unauthorised transaction of $480 in Perth while they are in Hobart."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is reporting an unrecognised transaction and potential card compromise, which falls under critical safety and fraud procedures."
+}

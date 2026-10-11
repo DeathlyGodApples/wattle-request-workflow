@@ -1,0 +1,18 @@
+{
+  "request_type": "service_request",
+  "product": "unknown",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "A callback from the bank",
+    "summary": "The customer wants a callback from the bank."
+  },
+  "missing_info": [
+    "phone number",
+    "reason for call"
+  ],
+  "confidence": 0.8,
+  "rationale": "The customer is asking for an action to be performed, which is a service request, although they have not provided details on why or a phone number."
+}

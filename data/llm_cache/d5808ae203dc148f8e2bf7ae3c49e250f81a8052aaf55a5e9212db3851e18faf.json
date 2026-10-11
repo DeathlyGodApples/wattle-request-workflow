@@ -1,0 +1,15 @@
+{
+  "request_type": "general_enquiry",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "learn how to set up a PayID using a mobile number",
+    "summary": "The customer wants to know how to set up a PayID using their mobile number."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is asking for instructions on how to use a feature and nothing needs to be actioned on their account."
+}

@@ -1,0 +1,18 @@
+{
+  "request_type": "critical",
+  "product": "unknown",
+  "risk_flags": [
+    "fraud",
+    "unauthorised_transaction"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Secure the account after a suspected account takeover.",
+    "summary": "The customer is unable to log in and reports their contact details were changed without their consent, suspecting account takeover."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer reports suspected account takeover and unauthorised changes to their profile, which is classified as a critical security issue."
+}

@@ -1,0 +1,17 @@
+{
+  "request_type": "hardship",
+  "product": "credit_card",
+  "risk_flags": [
+    "financial_difficulty"
+  ],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Work out a solution for credit card repayments due to reduced pay from cancer treatment",
+    "summary": "The customer is struggling to make credit card repayments due to reduced pay from medical treatment and asks for hardship assistance."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is unable to meet repayments due to illness and reduced income, requesting assistance."
+}

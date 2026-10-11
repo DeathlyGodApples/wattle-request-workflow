@@ -1,0 +1,18 @@
+{
+  "request_type": "critical",
+  "product": "transaction_account",
+  "risk_flags": [
+    "scam",
+    "unauthorised_transaction"
+  ],
+  "extracted": {
+    "amount": "$900",
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "Report a scam transaction and seek assistance with a $900 bank transfer payment",
+    "summary": "The customer believes they were scammed out of $900 via bank transfer for a PS5 on Facebook Marketplace."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer reports an urgent scam involving a direct bank transfer payment and being blocked by the seller, falling under the critical category."
+}

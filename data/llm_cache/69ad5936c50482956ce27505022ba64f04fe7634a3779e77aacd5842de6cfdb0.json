@@ -1,0 +1,17 @@
+{
+  "request_type": "service_request",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": "everyday account",
+    "desired_outcome": "close everyday account and transfer remaining balance to savings account",
+    "summary": "The customer wants to close their everyday account and transfer the remaining balance to their savings account."
+  },
+  "missing_info": [
+    "account number"
+  ],
+  "confidence": 1.0,
+  "rationale": "The customer is asking to perform an action on their account by closing it and transferring the balance."
+}

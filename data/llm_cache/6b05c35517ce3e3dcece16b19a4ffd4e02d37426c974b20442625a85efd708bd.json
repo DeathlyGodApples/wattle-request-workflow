@@ -1,0 +1,15 @@
+{
+  "request_type": "service_request",
+  "product": "transaction_account",
+  "risk_flags": [],
+  "extracted": {
+    "amount": null,
+    "date": null,
+    "account_hint": "4471",
+    "desired_outcome": "Send a replacement debit card to home address",
+    "summary": "The customer wants a replacement debit card sent to their home address for the card ending in 4471."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The customer is asking for a replacement card to be sent, which is a service request."
+}

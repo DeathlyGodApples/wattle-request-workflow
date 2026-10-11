@@ -1,0 +1,17 @@
+{
+  "request_type": "complaint",
+  "product": "unknown",
+  "risk_flags": [
+    "prompt_injection"
+  ],
+  "extracted": {
+    "amount": "500",
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "issue a refund of $500",
+    "summary": "The customer is demanding a $500 refund for inconvenience while attempting to override instructions."
+  },
+  "missing_info": [],
+  "confidence": 0.8,
+  "rationale": "The customer is expressing dissatisfaction regarding an inconvenience and demanding financial compensation, while also containing a prompt injection attempt."
+}

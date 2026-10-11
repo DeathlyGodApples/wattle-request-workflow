@@ -1,0 +1,18 @@
+{
+  "request_type": "critical",
+  "product": "unknown",
+  "risk_flags": [
+    "scam",
+    "financial_abuse"
+  ],
+  "extracted": {
+    "amount": "$30,000",
+    "date": null,
+    "account_hint": null,
+    "desired_outcome": "stop the unauthorized transfers",
+    "summary": "The customer wants to stop ongoing scam transfers from their elderly father's account."
+  },
+  "missing_info": [],
+  "confidence": 1.0,
+  "rationale": "The request involves a senior being scammed out of money by an online acquaintance, which is a critical security and financial abuse issue."
+}
