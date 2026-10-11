@@ -132,6 +132,7 @@ wattle-request-workflow/
     ├── test_branches.py
     ├── test_pipeline.py
     ├── test_db.py
+    ├── test_app.py           # app logic + both pages via streamlit.testing (fake LLM, temp DB)
     └── test_eval_metrics.py
 ```
 
@@ -330,6 +331,8 @@ Functions: `init_db()`, `save_case(result) -> bool`, `list_cases(status=None)`, 
 - Log table of all cases; expand to see steps.
 
 Keep styling minimal; clarity over polish.
+
+Implementation notes (M5): both pages live in `app.py` and are switched with a sidebar radio, so the rules toggle and reset button are shared. The logic behind the buttons (`process_and_log`, `process_all`, `held_draft`, `summary_table`) is plain functions with no Streamlit calls. Customer and LLM text is shown with `st.text` only, never as Markdown. Pasted custom text gets its own ID (`CUSTOM-<8 hex>`).
 
 ### 6.10 Evaluation (`eval.py`)
 

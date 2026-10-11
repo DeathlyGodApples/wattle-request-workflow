@@ -5,7 +5,8 @@ applies deterministic rules to decide the path, and holds anything risky for hum
 
 **Core principle:** the AI classifies. Code decides. A human approves anything risky.
 
-> Status: scaffold only (milestone M0). The full README is written in M6; see `CLAUDE.md` §11.
+> Status: pipeline, evaluation and app are built (milestones M0 to M5). The full README is
+> written in M6; see `CLAUDE.md` §11.
 
 ## Rule order note
 
