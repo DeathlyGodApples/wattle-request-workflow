@@ -38,7 +38,9 @@ class LLMError(Exception):
 class LLMClient(Protocol):
     """Anything that can turn a prompt into a validated instance of `schema`."""
 
-    def generate_json(self, system: str, user: str, schema: type[BaseModel]) -> BaseModel: ...
+    def generate_json(self, system: str, user: str, schema: type[BaseModel]) -> BaseModel:
+        """Return the model's answer as a validated `schema` object, or raise LLMError."""
+        ...
 
 
 @dataclass(frozen=True)

@@ -26,6 +26,11 @@ messages are synthetic.
 
 Needs Python 3.11 or newer and a free Gemini API key from Google AI Studio.
 
+**The app and the evaluation need an API key.** The LLM answer cache (`.cache/`) is not part
+of the repository, so a fresh clone has no stored answers: without a key the app shows
+"GEMINI_API_KEY is not set" when you press Process, including for the demo requests. Only the
+tests run without a key. Your key goes in `.env`, which git ignores, and is never committed.
+
 Windows (PowerShell):
 
 ```powershell
