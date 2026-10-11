@@ -1,0 +1,61 @@
+flowchart LR
+    %% Wattle Bank Request Workflow - Architecture (lean POC)
+    %% The AI classifies. Code decides. A human approves anything risky.
+
+    IN["<b>Incoming request</b><br/>single form or batch of samples"]
+
+    subgraph S1["1 · Understand"]
+        direction TB
+        AI["<b>AI classifier</b><br/>structured JSON (Pydantic)<br/>type · product · risk flags · details · confidence"]
+        KW["<b>Keyword check</b><br/>fraud · scam · self-harm · abuse"]
+    end
+
+    subgraph S2["2 · Decide (code only)"]
+        RULES["<b>Rules R0–R4</b> (first match decides)<br/>R0 AI error → human review (critical keyword still wins)<br/>R1 AI OR risk flag OR keyword → Critical<br/>R2 prompt injection → human review<br/>R3 hardship signal beats complaint<br/>R4 low confidence / unclear → human review"]
+    end
+
+    subgraph S3["3 · Act · one function per branch (Critical, Hardship & Human review never auto-send)"]
+        direction TB
+        B1["<b>Critical</b><br/>pause replies · alert supervisor<br/>held for approval · suppressed if abuse / self-harm / outage"]
+        B2["<b>Hardship</b><br/>draft held · hardship team<br/>21 days if credit/unknown, else 10"]
+        B3["<b>Complaint</b><br/>acknowledgement · summary to team<br/>30-day due date"]
+        B4["<b>Service request</b><br/>extract details · ask if missing<br/>route + reference number"]
+        B5["<b>General enquiry</b><br/>FAQ answer with source<br/>no match → human"]
+        B6["<b>Human review</b><br/>unclear · low confidence · injection"]
+    end
+
+    FAQ[("<b>faq.json</b><br/>15 entries")]
+    DB[("<b>Decision log</b><br/>SQLite · every step")]
+    UI["<b>Streamlit app</b><br/>Process requests · Review queue & log"]
+    OPS["<b>Operations reviewer</b><br/>approve / edit drafts"]
+    EV["<b>eval.py</b><br/>58 labelled test requests<br/>AI alone vs AI + rules"]
+
+    IN --> AI & KW
+    AI --> RULES
+    KW --> RULES
+    RULES --> B1 & B2 & B3 & B4 & B5 & B6
+    FAQ -.- B5
+    B1 & B2 & B3 & B4 & B5 & B6 --> DB
+    DB --> UI
+    UI <--> OPS
+    EV -.->|measures| RULES
+
+    classDef code fill:#E3F0FB,stroke:#2B6CB0,color:#1A202C
+    classDef ai fill:#EFE9FB,stroke:#6B4FBB,color:#1A202C
+    classDef human fill:#FDF1E1,stroke:#C77A12,color:#1A202C
+    classDef critical fill:#FCEBEB,stroke:#C53030,color:#1A202C
+    classDef data fill:#EEF0F2,stroke:#5F6B7A,color:#1A202C
+    classDef quality fill:#F0F7EE,stroke:#2F855A,color:#1A202C
+    classDef input fill:#F7F8FA,stroke:#8A94A3,color:#1A202C
+
+    class KW,RULES,B3,B4,B5 code
+    class AI ai
+    class B2,B6,OPS human
+    class B1 critical
+    class FAQ,DB data
+    class EV quality
+    class IN,UI input
+
+    style S1 fill:#FFFFFF,stroke:#B8C0CA,stroke-dasharray:5 4
+    style S2 fill:#FFFFFF,stroke:#B8C0CA,stroke-dasharray:5 4
+    style S3 fill:#FFFFFF,stroke:#B8C0CA,stroke-dasharray:5 4
