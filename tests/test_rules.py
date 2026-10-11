@@ -137,12 +137,36 @@ def test_r3_beats_r4_low_confidence_hardship_signal_goes_to_hardship() -> None:
     assert decision.rules_fired == ["R3", "R4"]
 
 
-def test_r0_beats_r1_an_llm_failure_goes_to_a_person_even_with_keywords() -> None:
+def test_llm_outage_with_a_critical_keyword_is_still_critical() -> None:
     c = make_classification("unclear", confidence=0.0, llm_error=True)
     decision = apply_rules(c, CRITICAL_HIT, threshold=0.7)
-    assert decision.final_type is FinalType.HUMAN_REVIEW
+    assert decision.final_type is FinalType.CRITICAL
+    assert decision.urgency is Urgency.CRITICAL
     assert decision.rules_fired[:2] == ["R0", "R1"]
     assert decision.requires_human is True
+
+
+def test_llm_outage_without_a_critical_keyword_goes_to_human_review() -> None:
+    c = make_classification("unclear", confidence=0.0, llm_error=True)
+    decision = apply_rules(c, NO_HITS, threshold=0.7)
+    assert decision.final_type is FinalType.HUMAN_REVIEW
+    assert decision.urgency is Urgency.MEDIUM
+    assert decision.rules_fired == ["R0", "R4"]
+    assert decision.requires_human is True
+
+
+def test_llm_outage_with_only_a_hardship_keyword_goes_to_human_review() -> None:
+    c = make_classification("unclear", confidence=0.0, llm_error=True)
+    decision = apply_rules(c, HARDSHIP_HIT, threshold=0.7)
+    assert decision.final_type is FinalType.HUMAN_REVIEW
+    assert "R1" not in decision.rules_fired
+
+
+def test_llm_outage_in_ai_only_mode_ignores_keywords() -> None:
+    c = make_classification("unclear", confidence=0.0, llm_error=True)
+    decision = apply_rules(c, CRITICAL_HIT, use_rules=False)
+    assert decision.final_type is FinalType.HUMAN_REVIEW
+    assert decision.rules_fired == ["AI_ONLY"]
 
 
 def test_r3_does_not_apply_to_unclear_requests() -> None:

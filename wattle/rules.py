@@ -68,8 +68,10 @@ def _checks(
     )
     shows_difficulty = RiskFlag.FINANCIAL_DIFFICULTY in flags or bool(hits.hardship)
     is_uncertain = c.confidence < threshold or c.request_type is RequestType.UNCLEAR
+    # An LLM outage must not hide a risky message: a critical keyword still makes it critical.
+    outage_result = FinalType.CRITICAL if hits.critical else FinalType.HUMAN_REVIEW
     return [
-        ("R0", FinalType.HUMAN_REVIEW, c.llm_error),
+        ("R0", outage_result, c.llm_error),
         ("R1", FinalType.CRITICAL, is_critical),
         ("R2", FinalType.HUMAN_REVIEW, RiskFlag.PROMPT_INJECTION in flags),
         ("R3", FinalType.HARDSHIP, c.request_type in HARDSHIP_UPGRADE_TYPES and shows_difficulty),

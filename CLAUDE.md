@@ -226,7 +226,7 @@ Evaluate in this exact order. Record the ID of every rule that fires in `rules_f
 
 | ID | Condition | Result |
 |---|---|---|
-| R0 | `c.llm_error` | `human_review` |
+| R0 | `c.llm_error` | `critical` if `hits.critical` (an outage must not hide a risky message; `rules_fired` shows both R0 and R1), otherwise `human_review` |
 | R1 | `c.request_type == critical` **or** any of {fraud, scam, unauthorised_transaction, self_harm, financial_abuse} in flags **or** `hits.critical` | `critical` (beats everything below, including low confidence — safety first) |
 | R2 | `prompt_injection` in flags | `human_review` |
 | R3 | type ∈ {complaint, service_request, general_enquiry} **and** (`financial_difficulty` in flags **or** `hits.hardship`) | `hardship` |
@@ -237,7 +237,9 @@ Evaluate in this exact order. Record the ID of every rule that fires in `rules_f
 - **Urgency** (derived, both modes): critical→critical, hardship→high, complaint→high, service_request→medium, general_enquiry→low, human_review→medium.
 - **requires_human**: true for critical, hardship, human_review (both modes).
 
-Tests: table-driven, at least one test per rule, plus precedence tests (R1 beats R4; R2 beats R3; R3 beats R4).
+- **LLM outage note:** when the LLM call fails the classification carries no type or flags, so the keyword scan is the only signal left. A critical keyword hit therefore still produces `critical` during an outage; with no critical hit the request goes to `human_review`. The AI-only ablation ignores keywords, so there `llm_error → human_review` always.
+
+Tests: table-driven, at least one test per rule, plus precedence tests (R1 beats R4; R2 beats R3; R3 beats R4) and both outage cases (R0 with and without a critical keyword hit).
 
 ### 6.4 Deadlines (`deadlines.py`)
 

@@ -7,6 +7,14 @@ applies deterministic rules to decide the path, and holds anything risky for hum
 
 > Status: scaffold only (milestone M0). The full README is written in M6; see `CLAUDE.md` §11.
 
+## Rule order note
+
+Rules run in a fixed order (R0 to R4, see `wattle/rules.py`) and the first one that applies
+decides. One deliberate exception to "LLM failure goes to human review": if the LLM call fails
+(R0) but the message contains a critical keyword such as "stolen" or "didn't make", the request
+is still treated as **critical**, and the log shows both R0 and R1. An outage must not hide a
+risky message. With no critical keyword, a failed call goes to human review.
+
 ## Quick start
 
 ```powershell
