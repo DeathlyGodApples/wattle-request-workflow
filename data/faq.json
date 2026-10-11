@@ -1,0 +1,21 @@
+{
+  "bank": "Wattle Bank (fictional, for POC only)",
+  "note": "All policies, rates and fees below are invented for the prototype. 'Joint account' is deliberately missing so the enquiry branch must route REQ-040 to a human instead of guessing.",
+  "entries": [
+    {"id": "FAQ-01", "topic": "bsb", "question": "What is the BSB for the Melbourne CBD branch?", "answer": "The BSB for our Melbourne CBD branch (333 Collins Street) is 063-501."},
+    {"id": "FAQ-02", "topic": "bsb", "question": "What is the BSB for the Docklands branch?", "answer": "The BSB for our Docklands branch (800 Bourke Street) is 063-522."},
+    {"id": "FAQ-03", "topic": "bsb", "question": "Where can I find my BSB?", "answer": "Your BSB is shown under 'Account details' in the app and at the top of every statement."},
+    {"id": "FAQ-04", "topic": "savings_rate", "question": "What interest rate does the Online Saver pay?", "answer": "The Online Saver pays a base rate of 1.50% p.a. plus a bonus 3.25% p.a. in any month you deposit at least $200 and make no withdrawals, for a total of 4.75% p.a."},
+    {"id": "FAQ-05", "topic": "international_fees", "question": "Are there fees for using my debit card overseas?", "answer": "Purchases in a foreign currency attract a 3% international transaction fee. Overseas ATM withdrawals cost $5 plus any fee charged by the ATM operator."},
+    {"id": "FAQ-06", "topic": "travel", "question": "Do I need to tell you before I travel?", "answer": "No travel notice is needed. Make sure your mobile number is up to date so we can contact you about unusual activity."},
+    {"id": "FAQ-07", "topic": "payid", "question": "How do I set up a PayID with my mobile number?", "answer": "In the app go to Settings > PayID > Create PayID, choose your mobile number, confirm with the code we text you, and link it to the account you want payments to go to."},
+    {"id": "FAQ-08", "topic": "branch_hours", "question": "Is the Chadstone branch open on Saturdays?", "answer": "Yes. The Chadstone branch is open Saturday 9am to 1pm, and Monday to Friday 9:30am to 5pm."},
+    {"id": "FAQ-09", "topic": "branch_hours", "question": "What are standard branch hours?", "answer": "Most branches are open Monday to Friday 9:30am to 4pm. Check the branch finder in the app for Saturday trading."},
+    {"id": "FAQ-10", "topic": "term_deposit", "question": "What is the minimum term deposit and can I withdraw early?", "answer": "The minimum term deposit is $5,000. You can withdraw early with 31 days' notice, and an interest adjustment applies."},
+    {"id": "FAQ-11", "topic": "rewards", "question": "How do I check my credit card rewards points?", "answer": "Your points balance is shown on the credit card screen in the app under 'Rewards', and on your monthly statement."},
+    {"id": "FAQ-12", "topic": "card_lost", "question": "What should I do if my card is lost or stolen?", "answer": "Lock the card immediately in the app under Cards > Lock card, then call our 24/7 line on 13 00 00 to cancel it and order a replacement."},
+    {"id": "FAQ-13", "topic": "transfer_times", "question": "How long do transfers take?", "answer": "Transfers to PayID and most accounts via the New Payments Platform arrive within a minute. Other transfers usually arrive within one business day."},
+    {"id": "FAQ-14", "topic": "statements", "question": "How do I get old statements?", "answer": "Statements from the last seven years are available in the app under Accounts > Statements. You can download them as PDFs."},
+    {"id": "FAQ-15", "topic": "hardship_info", "question": "What can I do if I'm having trouble making repayments?", "answer": "Contact our Financial Hardship team as early as possible. We will respond in writing within 21 days and work with you on options such as reduced repayments or a short pause."}
+  ]
+}
