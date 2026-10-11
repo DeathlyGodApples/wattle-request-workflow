@@ -1,0 +1,36 @@
+{
+  "dataset": "dev",
+  "mode": "no-rules",
+  "model": "gemini-3.5-flash-lite",
+  "n": 14,
+  "excluded_few_shot": 6,
+  "type_accuracy": 1.0,
+  "correct": 14,
+  "per_type": {
+    "critical": {
+      "correct": 3,
+      "total": 3
+    },
+    "hardship": {
+      "correct": 3,
+      "total": 3
+    },
+    "complaint": {
+      "correct": 2,
+      "total": 2
+    },
+    "service_request": {
+      "correct": 2,
+      "total": 2
+    },
+    "general_enquiry": {
+      "correct": 2,
+      "total": 2
+    },
+    "human_review": {
+      "correct": 2,
+      "total": 2
+    }
+  },
+  "misses": []
+}

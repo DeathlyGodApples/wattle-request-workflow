@@ -1,0 +1,42 @@
+{
+  "dataset": "dev",
+  "mode": "no-rules",
+  "model": "gemini-flash-latest",
+  "n": 14,
+  "excluded_few_shot": 6,
+  "type_accuracy": 0.9286,
+  "correct": 13,
+  "per_type": {
+    "critical": {
+      "correct": 3,
+      "total": 3
+    },
+    "hardship": {
+      "correct": 3,
+      "total": 3
+    },
+    "complaint": {
+      "correct": 2,
+      "total": 2
+    },
+    "service_request": {
+      "correct": 1,
+      "total": 2
+    },
+    "general_enquiry": {
+      "correct": 2,
+      "total": 2
+    },
+    "human_review": {
+      "correct": 2,
+      "total": 2
+    }
+  },
+  "misses": [
+    {
+      "id": "DEV-013",
+      "expected": "service_request",
+      "predicted": "general_enquiry"
+    }
+  ]
+}
