@@ -7,6 +7,7 @@ stored as ISO-8601 text with their UTC offset; lists are stored as JSON text.
 from __future__ import annotations
 
 import json
+import logging
 import sqlite3
 from contextlib import closing
 from datetime import datetime
@@ -16,6 +17,8 @@ from typing import Any
 from wattle.config import DB_PATH
 from wattle.deadlines import now_local, to_local
 from wattle.models import CaseResult, CaseStatus, SendMode
+
+logger = logging.getLogger(__name__)
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS cases(
@@ -64,8 +67,12 @@ def reset_db(db_path: str | Path = DB_PATH) -> None:
         conn.execute("DELETE FROM drafts")
 
 
-def save_case(result: CaseResult, *, db_path: str | Path = DB_PATH) -> None:
-    """Store a processed case; processing the same request again replaces the earlier record."""
+def save_case(result: CaseResult, *, db_path: str | Path = DB_PATH) -> bool:
+    """Store a processed case; return False, changing nothing, if it was already approved.
+
+    Processing a request again replaces its earlier record, except once a person has signed
+    it off: an approval and its audit trail must never be overwritten.
+    """
     case_id = result.request.id
     created_at = result.received_at.isoformat()
     steps = [
@@ -77,6 +84,11 @@ def save_case(result: CaseResult, *, db_path: str | Path = DB_PATH) -> None:
         for draft in result.branch.drafts
     ]
     with closing(_connect(db_path)) as conn, conn:
+        # Take the write lock before checking, so an approval cannot slip in between.
+        conn.execute("BEGIN IMMEDIATE")
+        if _is_approved(conn, case_id):
+            logger.info("Case %s is approved; not overwriting it", case_id)
+            return False
         conn.execute("DELETE FROM steps WHERE case_id = ?", (case_id,))
         conn.execute("DELETE FROM drafts WHERE case_id = ?", (case_id,))
         conn.execute(
@@ -89,6 +101,13 @@ def save_case(result: CaseResult, *, db_path: str | Path = DB_PATH) -> None:
         conn.executemany(
             "INSERT INTO drafts(case_id, audience, text, send_mode) VALUES (?,?,?,?)", drafts
         )
+    return True
+
+
+def _is_approved(conn: sqlite3.Connection, case_id: str) -> bool:
+    """True if this case exists and a reviewer has already approved it."""
+    row = conn.execute("SELECT status FROM cases WHERE id = ?", (case_id,)).fetchone()
+    return row is not None and row["status"] == CaseStatus.APPROVED.value
 
 
 def _case_row(result: CaseResult) -> tuple[Any, ...]:

@@ -1,12 +1,14 @@
 """Templated drafts: regulated customer wording must be predictable, not LLM-written.
 
 Customer-facing text is fixed wording. The only things filled in are due dates, a reference,
-the amount and date copied from the customer's own message, and (when asking for missing
-details) the short list of what is missing. The LLM's summary appears in internal notes only.
+and the amount and date copied from the customer's own message. Nothing the LLM wrote itself
+reaches a customer: its summary appears in internal notes only, and what it says is missing
+is translated into our own fixed labels.
 """
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
 
 from wattle.models import Classification, Extracted, FaqEntry, Request
@@ -17,9 +19,21 @@ NATIONAL_DEBT_HELPLINE = "1800 007 007"
 RESPECT_LINE = "1800RESPECT (1800 737 732)"
 NOT_STATED = "not stated"
 
-# Limits on anything copied into a customer message, so it stays a short fact on one line.
+# Limit on anything copied into a customer message, so it stays a short fact on one line.
 MAX_FILLED_CHARS = 60
-MAX_MISSING_ITEMS = 5
+
+# The only details a customer can be asked for: (our label, wording of the LLM's that means it).
+# Passwords, PINs and one-time codes are deliberately absent, so they can never be requested.
+MISSING_INFO_LABELS: tuple[tuple[str, str], ...] = (
+    ("account number", r"account (number|no|num)\b"),
+    ("BSB", r"\bbsb\b"),
+    ("card last 4 digits", r"card (number|digits)|last (4|four)"),
+    ("new address", r"(?<!email )(?<!e-mail )\baddress\b"),
+    ("ID document", r"\bid\b|\bidenti|document|licen[cs]e|passport|certificate"),
+    ("account name", r"account name|account holder|name on|full name|new name|surname"),
+    ("date of birth", r"birth|\bdob\b"),
+)
+GENERIC_MISSING_INFO = "the details needed to complete your request"
 
 
 def short(value: str) -> str:
@@ -73,15 +87,23 @@ def financial_abuse_reply() -> str:
     )
 
 
-def hardship_reply(due: datetime) -> str:
-    """Supportive and specific about when we reply, without promising any outcome."""
+def hardship_reply(statutory_due: datetime | None) -> str:
+    """Supportive, with no promised outcome; a date is stated only for the statutory clock.
+
+    The 10-day target for non-credit products is an internal goal, not a commitment to the
+    customer, so for those cases (`statutory_due` is None) the reply names no date.
+    """
+    if statutory_due is None:
+        timing = "They will be in touch with you soon."
+    else:
+        timing = f"We will respond to you in writing by {format_date(statutory_due)}."
     return (
         "Hello,\n\n"
         "Thank you for letting us know about your situation. We are sorry things are difficult "
         "at the moment, and we want to help.\n\n"
         "Your request has been passed to our Financial Hardship team. A team member will "
         "review it and contact you to talk through your circumstances and the options that "
-        f"may be available. We will respond to you in writing by {format_date(due)}.\n\n"
+        f"may be available. {timing}\n\n"
         "You do not need to do anything else right now. If you would like free, independent "
         f"advice, the National Debt Helpline is available on {NATIONAL_DEBT_HELPLINE}.\n\n"
         "Wattle Bank Financial Hardship Team"
@@ -129,15 +151,26 @@ def complaint_internal_summary(req: Request, c: Classification, resolution_due: 
     )
 
 
-def missing_info_request(missing: list[str]) -> str:
-    """Ask for exactly what is needed, and warn the customer not to send secrets."""
-    items = "\n".join(f"- {short(item)}" for item in missing[:MAX_MISSING_ITEMS])
+def missing_info_labels(missing: list[str]) -> list[str]:
+    """Translate the LLM's wording into our fixed labels; anything unrecognised is dropped."""
+    return [
+        label
+        for label, pattern in MISSING_INFO_LABELS
+        if any(re.search(pattern, item, re.IGNORECASE) for item in missing)
+    ]
+
+
+def missing_info_request(labels: list[str]) -> str:
+    """Ask for the missing details by our own labels, or in general terms if none is known."""
+    if labels:
+        items = "\n".join(f"- {label}" for label in labels)
+        ask = f"we need a little more information from you:\n{items}"
+    else:
+        ask = f"we need {GENERIC_MISSING_INFO}."
     return (
         "Hello,\n\n"
-        "Thank you for your request. So that we can action it, we need a little more "
-        f"information from you:\n{items}\n\n"
-        "Please reply with these details. For your security, never send a password, PIN or "
-        "one-time code.\n\n"
+        f"Thank you for your request. So that we can action it, {ask}\n\n"
+        "Please reply with these details. We will never ask for your PIN or password.\n\n"
         "Wattle Bank Service Team"
     )
 

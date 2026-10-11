@@ -54,8 +54,8 @@ def handle_critical(
 ) -> BranchResult:
     """Stop automation, alert a supervisor and hold (or suppress) the reply."""
     followup = deadlines.critical_followup_due(now)
-    suppress = bool(SUPPRESS_FLAGS & set(c.risk_flags))
-    send_mode = SendMode.SUPPRESSED if suppress else SendMode.HELD_FOR_APPROVAL
+    suppress_reason = _suppress_reason(c)
+    send_mode = SendMode.SUPPRESSED if suppress_reason else SendMode.HELD_FOR_APPROVAL
     template, text = _critical_draft(c)
     flags = [flag.value for flag in c.risk_flags]
     steps = [
@@ -67,9 +67,8 @@ def handle_critical(
             rules_fired=decision.rules_fired,
         ),
     ]
-    if suppress:
-        reason = "self-harm or financial abuse flagged: contact could put the customer at risk"
-        steps.append(_step("suppress_outbound_contact", reason=reason))
+    if suppress_reason:
+        steps.append(_step("suppress_outbound_contact", reason=suppress_reason))
     steps.append(_step("draft_reply", template=template, send_mode=send_mode.value))
     steps.append(
         _step(
@@ -87,6 +86,16 @@ def handle_critical(
     )
 
 
+def _suppress_reason(c: Classification) -> str | None:
+    """Why no message may go to the customer, or None when a held reply is safe to prepare."""
+    if SUPPRESS_FLAGS & set(c.risk_flags):
+        return "self-harm or financial abuse flagged: contact could put the customer at risk"
+    if c.llm_error:
+        # Only a keyword made this critical, so we cannot tell fraud from a person at risk.
+        return "LLM unavailable, so no risk flags: the kind of risk is unknown"
+    return None
+
+
 def _critical_draft(c: Classification) -> tuple[str, str]:
     """Pick the wording for the kind of risk: (template name, text). Self-harm comes first."""
     if RiskFlag.SELF_HARM in c.risk_flags:
@@ -102,12 +111,14 @@ def handle_hardship(
     """Hold a supportive reply, route to the hardship team and start the right clock."""
     days = deadlines.hardship_clock_days(c.product)
     due = deadlines.hardship_due(now, c.product)
-    kind = "statutory" if days == deadlines.HARDSHIP_STATUTORY_DAYS else "internal"
+    statutory = days == deadlines.HARDSHIP_STATUTORY_DAYS
+    kind = "statutory" if statutory else "internal"
     steps = [
         _step(
             "draft_reply",
             template="hardship_reply",
             send_mode=SendMode.HELD_FOR_APPROVAL.value,
+            date_stated_to_customer=statutory,
         ),
         _step("route", to=HARDSHIP_TEAM),
         _step(
@@ -119,7 +130,9 @@ def handle_hardship(
             due_at=due.isoformat(),
         ),
     ]
-    draft = _customer_draft(templates.hardship_reply(due), SendMode.HELD_FOR_APPROVAL)
+    # The internal 10-day target stays internal; only the statutory date goes to the customer.
+    text = templates.hardship_reply(due if statutory else None)
+    draft = _customer_draft(text, SendMode.HELD_FOR_APPROVAL)
     return BranchResult(
         steps=steps,
         drafts=[draft],
@@ -182,9 +195,12 @@ def handle_service_request(
 ) -> BranchResult:
     """Ask for what is missing, or route the request and confirm it with a reference."""
     if c.missing_info:
-        text = templates.missing_info_request(c.missing_info)
+        # The customer sees our fixed labels only; the LLM's own wording stays in the log.
+        asked_for = templates.missing_info_labels(c.missing_info)
+        text = templates.missing_info_request(asked_for)
+        asked = _step("request_missing_info", missing=c.missing_info, asked_for=asked_for)
         return BranchResult(
-            steps=[_step("request_missing_info", missing=c.missing_info)],
+            steps=[asked],
             drafts=[_customer_draft(text, SendMode.AUTO)],
             route_to=SERVICE_TEAM,
             due_at=None,  # the clock starts once the customer has replied

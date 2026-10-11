@@ -99,6 +99,34 @@ def test_self_harm_wording_wins_when_both_flags_are_set() -> None:
     assert draft.send_mode is SendMode.SUPPRESSED
 
 
+def test_a_critical_case_found_during_an_llm_outage_is_suppressed_and_says_why() -> None:
+    # Only a keyword made it critical: with no risk flags we cannot tell fraud from self-harm.
+    c = make_classification("unclear", confidence=0.0, llm_error=True)
+    decision = build_decision(FinalType.CRITICAL, ["R0", "R1", "R4"])
+    result = branches.handle_critical(REQUEST, c, decision, NOW)
+
+    assert step_names(result) == [
+        "pause_automation",
+        "alert_supervisor",
+        "suppress_outbound_contact",
+        "draft_reply",
+        "set_followup",
+    ]
+    reason = step_detail(result, "suppress_outbound_contact")["reason"]
+    assert "LLM unavailable" in reason
+    assert "no risk flags" in reason
+    (draft,) = result.drafts
+    assert draft.send_mode is SendMode.SUPPRESSED
+    assert step_detail(result, "draft_reply")["send_mode"] == "suppressed"
+    assert result.status is CaseStatus.AWAITING_HUMAN
+
+
+def test_a_flagged_risk_gives_the_flag_as_the_reason_for_suppressing() -> None:
+    c = make_classification("critical", risk_flags=["self_harm"])
+    result = branches.handle_critical(REQUEST, c, decide("critical"), NOW)
+    assert "self-harm" in step_detail(result, "suppress_outbound_contact")["reason"]
+
+
 # --- hardship ---------------------------------------------------------------------------
 
 
@@ -116,6 +144,8 @@ def test_hardship_on_a_credit_product_starts_the_statutory_clock() -> None:
     assert clock["days"] == 21
     assert clock["kind"] == "statutory"
     assert "s72" in clock["reason"]
+    assert "in writing by 2 November 2026" in draft.text
+    assert step_detail(result, "draft_reply")["date_stated_to_customer"] is True
 
 
 def test_hardship_on_a_non_credit_product_starts_the_internal_clock() -> None:
@@ -124,6 +154,17 @@ def test_hardship_on_a_non_credit_product_starts_the_internal_clock() -> None:
     clock = step_detail(result, "start_clock")
     assert (clock["days"], clock["kind"]) == (10, "internal")
     assert result.due_at == NOW + timedelta(days=10)
+    assert clock["due_at"] == (NOW + timedelta(days=10)).isoformat()  # kept for the team
+
+
+def test_the_internal_ten_day_date_is_not_given_to_the_customer() -> None:
+    c = make_classification("hardship", product="savings")
+    result = branches.handle_hardship(REQUEST, c, decide("hardship"), NOW)
+    (draft,) = result.drafts
+    assert "22 October 2026" not in draft.text
+    assert "2026" not in draft.text
+    assert "They will be in touch with you soon." in draft.text
+    assert step_detail(result, "draft_reply")["date_stated_to_customer"] is False
 
 
 def test_hardship_with_an_unknown_product_gets_the_stricter_clock_and_says_why() -> None:
@@ -192,9 +233,37 @@ def test_service_request_with_missing_info_asks_the_customer_and_starts_no_clock
     (draft,) = result.drafts
     assert draft.send_mode is SendMode.AUTO
     assert "- account number" in draft.text
+    assert step_detail(result, "request_missing_info") == {
+        "missing": ["account number"],
+        "asked_for": ["account number"],
+    }
     assert result.status is CaseStatus.AWAITING_CUSTOMER
     assert result.due_at is None
     assert result.route_to == "service_team"
+
+
+def test_missing_info_the_bank_does_not_recognise_is_logged_but_never_sent() -> None:
+    wanted = ["your PIN and password", "new address"]
+    c = make_classification("service_request", missing_info=wanted)
+    result = branches.handle_service_request(REQUEST, c, decide("service_request"), NOW)
+
+    (draft,) = result.drafts
+    assert "- new address" in draft.text
+    assert "your PIN and password" not in draft.text
+    detail = step_detail(result, "request_missing_info")
+    assert detail == {"missing": wanted, "asked_for": ["new address"]}
+
+
+def test_missing_info_with_nothing_recognised_still_asks_in_general_terms() -> None:
+    c = make_classification("service_request", missing_info=["something odd"])
+    result = branches.handle_service_request(REQUEST, c, decide("service_request"), NOW)
+
+    (draft,) = result.drafts
+    assert draft.send_mode is SendMode.AUTO
+    assert "the details needed to complete your request" in draft.text
+    assert "something odd" not in draft.text
+    assert result.status is CaseStatus.AWAITING_CUSTOMER
+    assert step_detail(result, "request_missing_info")["asked_for"] == []
 
 
 def test_the_same_request_always_gets_the_same_reference() -> None:

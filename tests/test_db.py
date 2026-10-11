@@ -79,8 +79,8 @@ def test_a_case_with_no_due_date_or_route_is_stored_with_nulls(db_path: Path) ->
 
 
 def test_saving_the_same_request_again_replaces_it(db_path: Path) -> None:
-    db.save_case(make_case("complaint", "C-3"), db_path=db_path)
-    db.save_case(make_case("service_request", "C-3"), db_path=db_path)
+    assert db.save_case(make_case("complaint", "C-3"), db_path=db_path) is True
+    assert db.save_case(make_case("service_request", "C-3"), db_path=db_path) is True
 
     (listed,) = db.list_cases(db_path=db_path)
     assert listed["final_type"] == "service_request"
@@ -88,6 +88,49 @@ def test_saving_the_same_request_again_replaces_it(db_path: Path) -> None:
     assert case is not None
     assert [step["name"] for step in case["steps"]] == ["route", "confirm", "start_clock"]
     assert len(case["drafts"]) == 1
+
+
+def test_an_approved_case_is_never_overwritten(db_path: Path) -> None:
+    db.save_case(make_case("hardship", "C-20"), db_path=db_path)
+    db.approve_case("C-20", "Edited reply.", "Checked by Sam", now=LATER, db_path=db_path)
+    before = db.get_case("C-20", db_path=db_path)
+
+    saved = db.save_case(make_case("complaint", "C-20"), db_path=db_path)
+
+    assert saved is False
+    after = db.get_case("C-20", db_path=db_path)
+    assert after == before
+    assert after is not None
+    assert after["status"] == "approved"
+    assert after["final_type"] == "hardship"
+    assert after["reviewer_note"] == "Checked by Sam"
+    assert after["drafts"][0]["text"] == "Edited reply."
+    assert after["steps"][-1]["name"] == "human_approved"
+
+
+def test_a_case_still_waiting_for_a_human_can_be_replaced(db_path: Path) -> None:
+    db.save_case(make_case("hardship", "C-21"), db_path=db_path)
+    assert db.save_case(make_case("critical", "C-21"), db_path=db_path) is True
+    case = db.get_case("C-21", db_path=db_path)
+    assert case is not None
+    assert case["final_type"] == "critical"
+
+
+def test_saving_several_cases_reports_which_were_skipped(db_path: Path) -> None:
+    # This is how "process all" counts what it left alone.
+    db.save_case(make_case("hardship", "C-22"), db_path=db_path)
+    db.save_case(make_case("unclear", "C-23"), db_path=db_path)
+    db.approve_case("C-22", None, "", now=LATER, db_path=db_path)
+
+    rerun = [
+        make_case("hardship", "C-22"),
+        make_case("unclear", "C-23"),
+        make_case("complaint", "C-24"),
+    ]
+    outcomes = [db.save_case(result, db_path=db_path) for result in rerun]
+
+    assert outcomes == [False, True, True]
+    assert outcomes.count(False) == 1
 
 
 def test_list_cases_can_filter_by_status(db_path: Path) -> None:

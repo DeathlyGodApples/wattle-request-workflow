@@ -134,7 +134,8 @@ def test_an_llm_outage_with_a_critical_keyword_is_still_handled_as_critical() ->
     assert result.decision.final_type is FinalType.CRITICAL
     assert result.decision.rules_fired[:2] == ["R0", "R1"]
     assert result.branch.route_to == "fraud_and_safety_team"
-    assert [d.send_mode for d in result.branch.drafts] == [SendMode.HELD_FOR_APPROVAL]
+    assert [d.send_mode for d in result.branch.drafts] == [SendMode.SUPPRESSED]
+    assert "suppress_outbound_contact" in [step.name for step in result.branch.steps]
 
 
 def test_an_faq_outage_hands_the_enquiry_to_a_person_instead_of_raising() -> None:

@@ -122,10 +122,12 @@ wattle-request-workflow/
 ├── results/                  # eval reports (markdown + json); raw/ gitignored
 └── tests/
     ├── conftest.py
+    ├── helpers.py            # shared test builders: make_request, make_classification, scripted_llm, NOW
     ├── test_models.py
     ├── test_keywords.py
     ├── test_rules.py
     ├── test_deadlines.py
+    ├── test_templates.py
     ├── test_faq.py
     ├── test_branches.py
     ├── test_pipeline.py
@@ -181,8 +183,12 @@ class Draft:          audience: "customer"|"internal", text: str, send_mode: Sen
 class Step:           name: str, detail: dict
 class BranchResult:   steps: list[Step], drafts: list[Draft], route_to: str|None,
                       due_at: datetime|None, status: CaseStatus
-class CaseResult:     request, classification, decision, branch: BranchResult, keyword_hits: list[str]
+class FaqSelection:   faq_id: str|None, confidence: float (0..1)   # what the LLM returns for FAQ selection (§6.6)
+class CaseResult:     request, received_at: datetime, classification, decision,
+                      branch: BranchResult, keyword_hits: list[str]
 ```
+
+- `CaseResult.received_at` (added in M4) is the Melbourne time the pipeline received the request. Every due date in the case is counted from it, and `db.save_case` stores it as `cases.received_at`.
 
 ### 5.3 LLM layer (`wattle/llm.py`)
 
@@ -253,18 +259,27 @@ Calendar days only, timezone `Australia/Melbourne`.
 
 One function per final type, signature `def handle_<type>(req, c, decision, now) -> BranchResult`. Steps are plain records — no framework.
 
+The one exception is `handle_general_enquiry(req, c, decision, now, llm)`: it takes the LLM client as a fifth argument because it is the only branch that makes an LLM call (FAQ selection). `run_branch(req, c, decision, now, llm)` dispatches to the right handler.
+
 **Drafts are templated, not LLM-written** (`templates.py`): regulated customer communication must be predictable; templates are filled from `Extracted` fields. State this in the README.
 
 | Branch | Steps (in order) | Drafts | route_to | status |
 |---|---|---|---|---|
-| critical | `pause_automation`, `alert_supervisor`(summary), `draft_reply`, `set_followup`(15 min) | customer draft `held_for_approval`; **if `financial_abuse` or `self_harm` flagged → `suppressed`** with step `suppress_outbound_contact`. Self-harm draft template includes Lifeline 13 11 14. | `fraud_and_safety_team` | awaiting_human |
-| hardship | `draft_reply`, `route`, `start_clock`(21d statutory or 10d internal per §6.4 — record which and why) | customer draft `held_for_approval` (supportive, promises no outcome) | `hardship_team` | awaiting_human |
+| critical | `pause_automation`, `alert_supervisor`(summary), `draft_reply`, `set_followup`(15 min) | customer draft `held_for_approval`; **if `financial_abuse` or `self_harm` flagged, or `c.llm_error` → `suppressed`** with step `suppress_outbound_contact` (the step records why). Self-harm draft template includes Lifeline 13 11 14. | `fraud_and_safety_team` | awaiting_human |
+| hardship | `draft_reply`, `route`, `start_clock`(21d statutory or 10d internal per §6.4 — record which and why) | customer draft `held_for_approval` (supportive, promises no outcome; states a response date only for the 21-day statutory clock) | `hardship_team` | awaiting_human |
 | complaint | `draft_acknowledgement`, `summarise`, `route`, `start_clock`(30d) | customer ack `auto`; internal summary (what, amount, date, desired outcome) | `complaints_team` | routed |
-| service_request | if `missing_info`: `request_missing_info` → status awaiting_customer; else `route`, `confirm`(reference `WB-<8 hex>`), `start_clock`(5d) | customer draft `auto` | `service_team` | awaiting_customer or routed |
+| service_request | if `missing_info`: `request_missing_info` → status awaiting_customer; else `route`, `confirm`(reference `WB-<8 hex>`), `start_clock`(5d) | customer draft `auto`; missing details are asked for by fixed allow-list labels only | `service_team` | awaiting_customer or routed |
 | general_enquiry | `select_faq`; if match: `answer_from_faq` (FAQ answer verbatim + "Source: FAQ-xx"), status auto_resolved; else `handoff_no_faq_match` → status awaiting_human | answer draft `auto` (only if matched) | — / `human_review` | auto_resolved or awaiting_human |
 | human_review | `queue_for_review`(rules_fired + rationale) | none | `human_review` | awaiting_human |
 
 **Invariant (test it):** if `decision.requires_human` then no draft has `send_mode == auto`.
+
+**No LLM-written text reaches a customer.** Decisions recorded in M4:
+
+- **Missing info (service request):** `c.missing_info` is the LLM's wording, so it is never sent. `templates.missing_info_labels()` maps it to a fixed allow-list of labels: account number, BSB, card last 4 digits, new address, ID document, account name, date of birth. Anything else is dropped. If no label remains, the draft asks for "the details needed to complete your request". The template always says "We will never ask for your PIN or password." The draft stays `auto`. The step `request_missing_info` logs both the LLM's list (`missing`) and what was asked (`asked_for`).
+- **Critical during an LLM outage:** when `c.llm_error` is true and the result is critical (a keyword hit, R0 + R1), there are no risk flags, so the kind of risk is unknown (fraud or a person at risk). The draft is `suppressed` by default and `suppress_outbound_contact` says why.
+- **Hardship response date:** the customer is told "we will respond in writing by <date>" only when the 21-day statutory clock applies. For the internal 10-day target the draft says the team will be in touch and names no date; the date stays in the `start_clock` step and `due_at`.
+- **Copied values:** the amount and date shown in a complaint acknowledgement are cut to one line of at most 60 characters.
 
 ### 6.6 FAQ selection (`faq.py`)
 
@@ -295,14 +310,18 @@ drafts(id INTEGER PRIMARY KEY AUTOINCREMENT, case_id TEXT, audience TEXT,
        text TEXT, send_mode TEXT)
 ```
 
-Functions: `init_db()`, `save_case(result)`, `list_cases(status=None)`, `get_case(id)`, `approve_case(id, edited_text, note)` (sets status `approved`, updates the held draft, appends a step `human_approved`), `reset_db()`.
+Functions: `init_db()`, `save_case(result) -> bool`, `list_cases(status=None)`, `get_case(id)`, `approve_case(id, edited_text, note)` (sets status `approved`, updates the held draft, appends a step `human_approved`), `reset_db()`.
+
+- `save_case` replaces an earlier record for the same request ID, **except** when that case's status is `approved`: then it changes nothing and returns `False` (otherwise `True`). An approval and its audit trail are never overwritten.
+- `list_cases` returns cases in queue order: urgency, then due date (earliest first, no due date last).
+- `approve_case` rewrites only a draft that is `held_for_approval`; a `suppressed` draft is left as it is. It raises `KeyError` for an unknown ID and `ValueError` if the case is not `awaiting_human` or the edited text is blank.
 
 ### 6.9 Streamlit app (`app.py`) — 2 pages
 
 **Page 1 — Process requests**
 - Pick a sample from a dropdown (dev + test files, showing `id — subject`) **or** paste custom text.
 - "Process" → shows a **result card**: final type (coloured badge), urgency, AI type + confidence, rules fired, keyword hits, rationale, steps timeline, drafts (with send mode badge: AUTO / HELD / SUPPRESSED), route, due date.
-- "Process all samples" button → runs a file through the pipeline (uses cache), shows a summary table.
+- "Process all samples" button → runs a file through the pipeline (uses cache), shows a summary table. Cases already `approved` are skipped (not re-processed, not overwritten) and the page reports how many were skipped.
 - Sidebar: "Rules on/off" toggle (shows the ablation live), "Reset demo data" button.
 
 **Page 2 — Review queue & log**
