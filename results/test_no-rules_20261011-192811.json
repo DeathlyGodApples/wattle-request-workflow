@@ -1,0 +1,62 @@
+{
+  "dataset": "test",
+  "mode": "no-rules",
+  "model": "gemini-3.5-flash-lite",
+  "n": 58,
+  "excluded_few_shot": 0,
+  "type_accuracy": 0.9138,
+  "correct": 53,
+  "per_type": {
+    "critical": {
+      "correct": 13,
+      "total": 13
+    },
+    "hardship": {
+      "correct": 11,
+      "total": 11
+    },
+    "complaint": {
+      "correct": 11,
+      "total": 13
+    },
+    "service_request": {
+      "correct": 9,
+      "total": 9
+    },
+    "general_enquiry": {
+      "correct": 8,
+      "total": 9
+    },
+    "human_review": {
+      "correct": 1,
+      "total": 3
+    }
+  },
+  "misses": [
+    {
+      "id": "REQ-044",
+      "expected": "complaint",
+      "predicted": "general_enquiry"
+    },
+    {
+      "id": "REQ-045",
+      "expected": "complaint",
+      "predicted": "service_request"
+    },
+    {
+      "id": "REQ-046",
+      "expected": "human_review",
+      "predicted": "complaint"
+    },
+    {
+      "id": "REQ-050",
+      "expected": "human_review",
+      "predicted": "service_request"
+    },
+    {
+      "id": "REQ-052",
+      "expected": "general_enquiry",
+      "predicted": "service_request"
+    }
+  ]
+}
