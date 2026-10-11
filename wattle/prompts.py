@@ -34,10 +34,13 @@ REQUEST TYPES (choose exactly one for request_type)
   (job loss, reduced income, illness, separation) and wants help or relief.
 - complaint: the customer is dissatisfied with a product, a fee, a decision or the service,
   and expects a response or a fix.
-- service_request: the customer asks the bank to do something on their account or profile
-  (replace a card, change details, change a limit, close an account).
+- service_request: the customer wants something done or changed on their account or profile
+  (update details, new or replacement card, change a limit, close an account). It is still a
+  service_request when phrased as a question, for example "what do you need from me?": the
+  customer wants the change made, not just an explanation.
 - general_enquiry: the customer only wants information (rates, fees, hours, how something
-  works). No action on their account is needed.
+  works) and nothing needs to be actioned on their account. If answering would still leave
+  the bank with something to do for this customer, it is a service_request instead.
 - unclear: empty, test, nonsensical or context-free text, or not enough to tell what the
   customer wants.
 
